@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.test.context.TestPropertySource;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @Slf4j
 @DataMongoTest
@@ -31,14 +30,14 @@ class NotificationRepositoryTest {
     void entityInheritanceTest() {
 
         var not1 = ScheduleCreateNotification.builder()
-            .userId(1)
-            .createdAt(LocalDateTime.now())
+            .receiverId(1)
+            .notifiedAt(LocalDateTime.now())
             .scheduleId(1L)
             .build();
 
         var not2 = AttendeeResponseNotification.builder()
-            .userId(1)
-            .createdAt(LocalDateTime.now())
+            .receiverId(1)
+            .notifiedAt(LocalDateTime.now())
             .scheduleId(2L)
             .attendeeId(2L)
             .response("ACCEPTED")
@@ -48,8 +47,8 @@ class NotificationRepositoryTest {
         var updatedStartTime = LocalDateTime.now().plusHours(1);
 
         var not3 = ScheduleUpdateTimeNotification.builder()
-            .userId(1)
-            .createdAt(LocalDateTime.now())
+            .receiverId(1)
+            .notifiedAt(LocalDateTime.now())
             .scheduleId(3L)
             .previousStartTime(prevStartTime)
             .previousEndTime(prevStartTime.plusMinutes(30))

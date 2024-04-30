@@ -1,5 +1,6 @@
 package com.edgescheduler.notificationservice.dto;
 
+import com.edgescheduler.notificationservice.domain.Notification;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import lombok.Getter;
@@ -9,12 +10,12 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder
 @NoArgsConstructor
-public class NotificationMessage {
+public abstract class NotificationMessage {
 
-    @JsonProperty("type")
+    private String id;
     private NotificationType type;
     private Integer receiverId;
-    private LocalDateTime notifiedTime;
+    private LocalDateTime notifiedAt;
     private Long scheduleId;
     private String scheduleName;
     private Boolean isRead;
@@ -27,4 +28,6 @@ public class NotificationMessage {
         ATTENDEE_RESPONSE,
         ATTENDEE_SCHEDULE_PROPOSAL
     }
+
+    public abstract Notification toEntity();
 }

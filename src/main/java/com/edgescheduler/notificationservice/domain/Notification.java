@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Notification {
     @Id
     private String id;
-    private Integer userId;
-    private LocalDateTime createdAt;
+    private Integer receiverId;
+    private LocalDateTime notifiedAt;
+    private Boolean isRead;
 }

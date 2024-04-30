@@ -13,6 +13,7 @@ import org.springframework.data.annotation.TypeAlias;
 public class AttendeeProposalNotification extends Notification {
     private Long scheduleId;
     private Integer attendeeId;
-    private LocalDateTime proposalTime;
-    private String proposal;
+    private LocalDateTime proposedStartTime;
+    private LocalDateTime proposedEndTime;
+    private String reason;
 }

@@ -1,5 +1,6 @@
 package com.edgescheduler.notificationservice.dto;
 
+import com.edgescheduler.notificationservice.domain.ScheduleUpdateNotTimeNotification;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Getter;
@@ -17,9 +18,14 @@ public class ScheduleUpdateNotTimeMessage extends NotificationMessage {
     private LocalDateTime endTime;
     private List<UpdatedField> updatedFields;
 
-    public enum UpdatedField {
-        TIME,
-        TITLE,
-        DESCRIPTION
+    public ScheduleUpdateNotTimeNotification toEntity() {
+        return ScheduleUpdateNotTimeNotification.builder()
+            .receiverId(this.getReceiverId())
+            .notifiedAt(this.getNotifiedAt())
+            .scheduleId(this.getScheduleId())
+            .isRead(this.getIsRead())
+            .updatedName(this.getScheduleName())
+            .updatedFields(this.getUpdatedFields())
+            .build();
     }
 }
