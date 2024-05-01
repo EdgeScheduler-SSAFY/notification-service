@@ -1,13 +1,14 @@
 package com.edgescheduler.notificationservice.service;
 
-import com.edgescheduler.notificationservice.dto.NotificationMessage;
+import com.edgescheduler.notificationservice.event.NotificationEvent;
+import com.edgescheduler.notificationservice.message.EventMessage;
 import reactor.core.publisher.Flux;
 
 public interface NotificationService {
 
-    void saveNotification(NotificationMessage notificationMessage);
+    Flux<NotificationEvent> saveNotificationFromEventMessage(EventMessage eventMessage);
 
-    Flux<NotificationMessage> getNotificationsByReceiverId(Integer receiverId);
+    Flux<NotificationEvent> getNotificationsByReceiverId(Integer receiverId);
 
     void markAsRead(Integer notificationId);
 

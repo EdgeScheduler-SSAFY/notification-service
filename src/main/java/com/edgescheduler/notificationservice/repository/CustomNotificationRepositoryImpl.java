@@ -1,6 +1,5 @@
 package com.edgescheduler.notificationservice.repository;
 
-import com.edgescheduler.notificationservice.dto.NotificationMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.stereotype.Repository;
