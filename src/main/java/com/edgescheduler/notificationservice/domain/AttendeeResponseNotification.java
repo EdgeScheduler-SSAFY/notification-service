@@ -1,11 +1,10 @@
 package com.edgescheduler.notificationservice.domain;
 
-import com.edgescheduler.notificationservice.dto.Response;
+import com.edgescheduler.notificationservice.event.Response;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.TypeAlias;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 @Getter
 @SuperBuilder

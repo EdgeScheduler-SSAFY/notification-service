@@ -1,6 +1,6 @@
 package com.edgescheduler.notificationservice.config;
 
-import com.edgescheduler.notificationservice.config.deserializer.MessageJsonDeserializer;
+import com.edgescheduler.notificationservice.config.deserializer.KafkaMessageJsonDeserializer;
 import com.edgescheduler.notificationservice.message.EventMessage;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +62,7 @@ public class KafkaConfig {
     ) {
         Map<String, Object> consumerProperties = properties.buildConsumerProperties();
         consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-            MessageJsonDeserializer.class);
+            KafkaMessageJsonDeserializer.class);
         log.info("Consumer properties: {}", consumerProperties);
         ReceiverOptions<String, EventMessage> receiverOptions = ReceiverOptions.create(
             consumerProperties);

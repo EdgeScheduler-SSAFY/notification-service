@@ -6,7 +6,8 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum ErrorCode {
 
-    EXAMPLE_ERROR(HttpStatus.BAD_REQUEST, "EX001", "This is an example error");
+    EXAMPLE_ERROR(HttpStatus.BAD_REQUEST, "EX001", "This is an example error"),
+    DUPLICATE_CONNECTION(HttpStatus.BAD_REQUEST, "NS001", "Only one connection is allowed at a time");
 
     private final HttpStatus httpStatus;
     private final String code;

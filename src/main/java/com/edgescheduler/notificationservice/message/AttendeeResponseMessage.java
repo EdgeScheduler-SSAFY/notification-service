@@ -1,6 +1,6 @@
 package com.edgescheduler.notificationservice.message;
 
-import com.edgescheduler.notificationservice.dto.Response;
+import com.edgescheduler.notificationservice.event.Response;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
@@ -8,8 +8,8 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class AttendeeResponseMessage extends EventMessage {
 
-    private Long meetingId;
-    private String meetingName;
+    private Long scheduleId;
+    private String scheduleName;
     private Integer organizerId;
     private Integer attendeeId;
     private String attendeeName;

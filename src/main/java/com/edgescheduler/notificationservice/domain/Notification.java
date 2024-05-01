@@ -15,6 +15,6 @@ public class Notification {
     @Id
     private String id;
     private Integer receiverId;
-    private LocalDateTime notifiedAt;
+    private LocalDateTime occurredAt;
     private Boolean isRead;
 }

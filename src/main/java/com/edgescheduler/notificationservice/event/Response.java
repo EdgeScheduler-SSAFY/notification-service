@@ -1,4 +1,4 @@
-package com.edgescheduler.notificationservice.dto;
+package com.edgescheduler.notificationservice.event;
 
 public enum Response {
     ACCEPTED,

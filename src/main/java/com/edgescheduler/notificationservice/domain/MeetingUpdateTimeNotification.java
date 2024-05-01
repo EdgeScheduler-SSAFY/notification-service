@@ -9,8 +9,8 @@ import org.springframework.data.annotation.TypeAlias;
 @Getter
 @SuperBuilder
 @NoArgsConstructor
-@TypeAlias("scheduleUpdateTime")
-public class ScheduleUpdateTimeNotification extends Notification {
+@TypeAlias("meetingUpdateTime")
+public class MeetingUpdateTimeNotification extends Notification {
     private Long scheduleId;
     private LocalDateTime previousStartTime;
     private LocalDateTime previousEndTime;

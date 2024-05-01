@@ -9,8 +9,8 @@ import org.springframework.data.annotation.TypeAlias;
 @Getter
 @SuperBuilder
 @NoArgsConstructor
-@TypeAlias("scheduleDelete")
-public class ScheduleDeleteNotification extends Notification {
+@TypeAlias("meetingDelete")
+public class MeetingDeleteNotification extends Notification {
     private String scheduleName;
     private Integer organizerId;
     private LocalDateTime startTime;

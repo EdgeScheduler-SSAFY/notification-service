@@ -8,8 +8,8 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class AttendeeProposalMessage extends EventMessage {
 
-    private Long meetingId;
-    private String meetingName;
+    private Long scheduleId;
+    private String scheduleName;
     private Integer organizerId;
     private Integer attendeeId;
     private String attendeeName;

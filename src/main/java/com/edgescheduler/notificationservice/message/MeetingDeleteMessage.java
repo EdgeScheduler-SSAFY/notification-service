@@ -11,8 +11,8 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 public class MeetingDeleteMessage extends EventMessage {
 
-    private Long meetingId;
-    private String meetingName;
+    private Long scheduleId;
+    private String scheduleName;
     private Integer organizerId;
     private String organizerName;
     private LocalDateTime startTime;

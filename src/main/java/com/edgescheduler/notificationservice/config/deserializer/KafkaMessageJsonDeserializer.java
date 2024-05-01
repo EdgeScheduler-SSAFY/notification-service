@@ -13,9 +13,9 @@ import org.apache.kafka.common.header.Headers;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 @Slf4j
-public class MessageJsonDeserializer extends JsonDeserializer<EventMessage> {
+public class KafkaMessageJsonDeserializer extends JsonDeserializer<EventMessage> {
 
-    public MessageJsonDeserializer() {
+    public KafkaMessageJsonDeserializer() {
         super(EventMessage.class);
     }
 

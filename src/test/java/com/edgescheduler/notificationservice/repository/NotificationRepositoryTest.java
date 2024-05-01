@@ -3,8 +3,8 @@ package com.edgescheduler.notificationservice.repository;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.edgescheduler.notificationservice.domain.AttendeeResponseNotification;
-import com.edgescheduler.notificationservice.domain.ScheduleCreateNotification;
-import com.edgescheduler.notificationservice.domain.ScheduleUpdateTimeNotification;
+import com.edgescheduler.notificationservice.domain.MeetingCreateNotification;
+import com.edgescheduler.notificationservice.domain.MeetingUpdateTimeNotification;
 import java.time.LocalDateTime;
 
 import com.edgescheduler.notificationservice.domain.Notification;
@@ -29,7 +29,7 @@ class NotificationRepositoryTest {
     @Test
     void entityInheritanceTest() {
 
-        var not1 = ScheduleCreateNotification.builder()
+        var not1 = MeetingCreateNotification.builder()
             .receiverId(1)
             .notifiedAt(LocalDateTime.now())
             .scheduleId(1L)
@@ -46,7 +46,7 @@ class NotificationRepositoryTest {
         var prevStartTime = LocalDateTime.now();
         var updatedStartTime = LocalDateTime.now().plusHours(1);
 
-        var not3 = ScheduleUpdateTimeNotification.builder()
+        var not3 = MeetingUpdateTimeNotification.builder()
             .receiverId(1)
             .notifiedAt(LocalDateTime.now())
             .scheduleId(3L)
@@ -64,17 +64,17 @@ class NotificationRepositoryTest {
         assertNotNull(find);
         assertEquals(3, find.size());
 
-        assertInstanceOf(ScheduleCreateNotification.class, find.get(0));
+        assertInstanceOf(MeetingCreateNotification.class, find.get(0));
         assertInstanceOf(AttendeeResponseNotification.class, find.get(1));
-        assertInstanceOf(ScheduleUpdateTimeNotification.class, find.get(2));
+        assertInstanceOf(MeetingUpdateTimeNotification.class, find.get(2));
 
-        assertEquals(not1.getScheduleId(), ((ScheduleCreateNotification) find.get(0)).getScheduleId());
+        assertEquals(not1.getScheduleId(), ((MeetingCreateNotification) find.get(0)).getScheduleId());
         assertEquals(not2.getResponse(), ((AttendeeResponseNotification) find.get(1)).getResponse());
         assertAll(
-            () -> assertEquals(not3.getPreviousStartTime().getHour(), ((ScheduleUpdateTimeNotification) find.get(2)).getPreviousStartTime().getHour()),
-            () -> assertEquals(not3.getPreviousStartTime().getMinute(), ((ScheduleUpdateTimeNotification) find.get(2)).getPreviousStartTime().getMinute()),
-            () -> assertEquals(not3.getUpdatedStartTime().getHour(), ((ScheduleUpdateTimeNotification) find.get(2)).getUpdatedStartTime().getHour()),
-            () -> assertEquals(not3.getUpdatedStartTime().getMinute(), ((ScheduleUpdateTimeNotification) find.get(2)).getUpdatedStartTime().getMinute())
+            () -> assertEquals(not3.getPreviousStartTime().getHour(), ((MeetingUpdateTimeNotification) find.get(2)).getPreviousStartTime().getHour()),
+            () -> assertEquals(not3.getPreviousStartTime().getMinute(), ((MeetingUpdateTimeNotification) find.get(2)).getPreviousStartTime().getMinute()),
+            () -> assertEquals(not3.getUpdatedStartTime().getHour(), ((MeetingUpdateTimeNotification) find.get(2)).getUpdatedStartTime().getHour()),
+            () -> assertEquals(not3.getUpdatedStartTime().getMinute(), ((MeetingUpdateTimeNotification) find.get(2)).getUpdatedStartTime().getMinute())
         );
 
     }

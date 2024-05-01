@@ -1,4 +1,4 @@
-package com.edgescheduler.notificationservice.dto;
+package com.edgescheduler.notificationservice.event;
 
 import com.edgescheduler.notificationservice.domain.AttendeeProposalNotification;
 import java.time.LocalDateTime;
@@ -9,7 +9,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder
 @NoArgsConstructor
-public class AttendeeProposalMessage extends NotificationMessage {
+public class AttendeeProposalEvent extends NotificationEvent {
 
     private Integer attendeeId;
     private String attendeeName;
@@ -20,7 +20,7 @@ public class AttendeeProposalMessage extends NotificationMessage {
     public AttendeeProposalNotification toEntity() {
         return AttendeeProposalNotification.builder()
             .receiverId(this.getReceiverId())
-            .notifiedAt(this.getNotifiedAt())
+            .occurredAt(this.getOccurredAt())
             .scheduleId(this.getScheduleId())
             .isRead(this.getIsRead())
             .attendeeId(attendeeId)

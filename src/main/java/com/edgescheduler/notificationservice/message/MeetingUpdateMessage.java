@@ -1,6 +1,6 @@
 package com.edgescheduler.notificationservice.message;
 
-import com.edgescheduler.notificationservice.dto.UpdatedField;
+import com.edgescheduler.notificationservice.event.UpdatedField;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Getter;
@@ -12,8 +12,8 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 public class MeetingUpdateMessage extends EventMessage {
 
-    private Long meetingId;
-    private String meetingName;
+    private Long scheduleId;
+    private String scheduleName;
     private Integer organizerId;
     private String organizerName;
     private LocalDateTime startTime;

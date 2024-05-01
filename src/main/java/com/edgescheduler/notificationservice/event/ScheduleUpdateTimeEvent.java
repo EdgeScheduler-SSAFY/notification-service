@@ -1,6 +1,6 @@
-package com.edgescheduler.notificationservice.dto;
+package com.edgescheduler.notificationservice.event;
 
-import com.edgescheduler.notificationservice.domain.ScheduleUpdateTimeNotification;
+import com.edgescheduler.notificationservice.domain.MeetingUpdateTimeNotification;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,7 +9,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder
 @NoArgsConstructor
-public class ScheduleUpdateTimeMessage extends NotificationMessage {
+public class ScheduleUpdateTimeEvent extends NotificationEvent {
 
     private Integer organizerId;
     private String organizerName;
@@ -18,10 +18,10 @@ public class ScheduleUpdateTimeMessage extends NotificationMessage {
     private LocalDateTime updatedStartTime;
     private LocalDateTime updatedEndTime;
 
-    public ScheduleUpdateTimeNotification toEntity() {
-        return ScheduleUpdateTimeNotification.builder()
+    public MeetingUpdateTimeNotification toEntity() {
+        return MeetingUpdateTimeNotification.builder()
             .receiverId(this.getReceiverId())
-            .notifiedAt(this.getNotifiedAt())
+            .occurredAt(this.getOccurredAt())
             .scheduleId(this.getScheduleId())
             .isRead(this.getIsRead())
             .previousStartTime(this.getPreviousStartTime())
