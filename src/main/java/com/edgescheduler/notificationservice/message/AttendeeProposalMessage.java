@@ -6,7 +6,7 @@ import lombok.experimental.SuperBuilder;
 
 @Getter
 @SuperBuilder
-public class AttendeeProposalMessage extends EventMessage {
+public class AttendeeProposalMessage extends KafkaEventMessage {
 
     private Long scheduleId;
     private String scheduleName;

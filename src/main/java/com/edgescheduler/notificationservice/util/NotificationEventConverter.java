@@ -7,33 +7,33 @@ import com.edgescheduler.notificationservice.domain.MeetingCreateNotification;
 import com.edgescheduler.notificationservice.domain.MeetingDeleteNotification;
 import com.edgescheduler.notificationservice.domain.MeetingUpdateNotTimeNotification;
 import com.edgescheduler.notificationservice.domain.MeetingUpdateTimeNotification;
-import com.edgescheduler.notificationservice.event.AttendeeProposalEvent;
-import com.edgescheduler.notificationservice.event.AttendeeResponseEvent;
-import com.edgescheduler.notificationservice.event.NotificationEvent;
-import com.edgescheduler.notificationservice.event.ScheduleCreateEvent;
-import com.edgescheduler.notificationservice.event.ScheduleDeleteEvent;
-import com.edgescheduler.notificationservice.event.ScheduleUpdateNotTimeEvent;
-import com.edgescheduler.notificationservice.event.ScheduleUpdateTimeEvent;
+import com.edgescheduler.notificationservice.event.AttendeeProposalSseEvent;
+import com.edgescheduler.notificationservice.event.AttendeeResponseSseEvent;
+import com.edgescheduler.notificationservice.event.NotificationSseEvent;
+import com.edgescheduler.notificationservice.event.MeetingCreateSseEvent;
+import com.edgescheduler.notificationservice.event.MeetingDeleteSseEvent;
+import com.edgescheduler.notificationservice.event.MeetingUpdateNotTimeSseEvent;
+import com.edgescheduler.notificationservice.event.MeetingUpdateTimeSseEvent;
 
 public class NotificationEventConverter {
 
-    public static Notification convertToNotification(NotificationEvent notificationEvent) {
+    public static Notification convertToNotification(NotificationSseEvent notificationEvent) {
         return switch (notificationEvent.getType()) {
             case SCHEDULE_CREATED -> convertToScheduleCreateNotification(
-                (ScheduleCreateEvent) notificationEvent);
+                (MeetingCreateSseEvent) notificationEvent);
             case SCHEDULE_UPDATED -> convertToScheduleUpdateNotTimeNotification(
-                (ScheduleUpdateNotTimeEvent) notificationEvent);
+                (MeetingUpdateNotTimeSseEvent) notificationEvent);
             case SCHEDULE_DELETED -> convertToScheduleDeleteNotification(
-                (ScheduleDeleteEvent) notificationEvent);
+                (MeetingDeleteSseEvent) notificationEvent);
             case ATTENDEE_RESPONSE -> convertToAttendeeResponseNotification(
-                (AttendeeResponseEvent) notificationEvent);
+                (AttendeeResponseSseEvent) notificationEvent);
             case ATTENDEE_SCHEDULE_PROPOSAL -> convertToAttendeeProposalNotification(
-                (AttendeeProposalEvent) notificationEvent);
+                (AttendeeProposalSseEvent) notificationEvent);
         };
     }
 
     private static MeetingCreateNotification convertToScheduleCreateNotification(
-        ScheduleCreateEvent notificationMessage) {
+        MeetingCreateSseEvent notificationMessage) {
         return MeetingCreateNotification.builder()
             .receiverId(notificationMessage.getReceiverId())
             .occurredAt(notificationMessage.getOccurredAt())
@@ -43,7 +43,7 @@ public class NotificationEventConverter {
     }
 
     private static MeetingUpdateNotTimeNotification convertToScheduleUpdateNotTimeNotification(
-        ScheduleUpdateNotTimeEvent notificationEvent) {
+        MeetingUpdateNotTimeSseEvent notificationEvent) {
         return MeetingUpdateNotTimeNotification.builder()
             .receiverId(notificationEvent.getReceiverId())
             .occurredAt(notificationEvent.getOccurredAt())
@@ -55,7 +55,7 @@ public class NotificationEventConverter {
     }
 
     private static MeetingUpdateTimeNotification convertToScheduleUpdateTimeNotification(
-        ScheduleUpdateTimeEvent notificationEvent) {
+        MeetingUpdateTimeSseEvent notificationEvent) {
         return MeetingUpdateTimeNotification.builder()
             .receiverId(notificationEvent.getReceiverId())
             .occurredAt(notificationEvent.getOccurredAt())
@@ -69,7 +69,7 @@ public class NotificationEventConverter {
     }
 
     private static MeetingDeleteNotification convertToScheduleDeleteNotification(
-        ScheduleDeleteEvent notificationEvent) {
+        MeetingDeleteSseEvent notificationEvent) {
         return MeetingDeleteNotification.builder()
             .receiverId(notificationEvent.getReceiverId())
             .occurredAt(notificationEvent.getOccurredAt())
@@ -82,7 +82,7 @@ public class NotificationEventConverter {
     }
 
     private static AttendeeResponseNotification convertToAttendeeResponseNotification(
-        AttendeeResponseEvent notificationEvent) {
+        AttendeeResponseSseEvent notificationEvent) {
         return AttendeeResponseNotification.builder()
             .receiverId(notificationEvent.getReceiverId())
             .occurredAt(notificationEvent.getOccurredAt())
@@ -94,7 +94,7 @@ public class NotificationEventConverter {
     }
 
     private static AttendeeProposalNotification convertToAttendeeProposalNotification(
-        AttendeeProposalEvent notificationEvent) {
+        AttendeeProposalSseEvent notificationEvent) {
         return AttendeeProposalNotification.builder()
             .receiverId(notificationEvent.getReceiverId())
             .occurredAt(notificationEvent.getOccurredAt())

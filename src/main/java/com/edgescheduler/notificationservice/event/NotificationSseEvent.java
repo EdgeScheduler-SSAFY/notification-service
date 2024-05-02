@@ -9,7 +9,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder
 @NoArgsConstructor
-public abstract class NotificationEvent {
+public abstract class NotificationSseEvent {
 
     private String id;
     private NotificationType type;

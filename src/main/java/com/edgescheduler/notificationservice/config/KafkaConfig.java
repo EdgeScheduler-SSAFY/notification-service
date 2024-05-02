@@ -1,7 +1,7 @@
 package com.edgescheduler.notificationservice.config;
 
 import com.edgescheduler.notificationservice.config.deserializer.KafkaMessageJsonDeserializer;
-import com.edgescheduler.notificationservice.message.EventMessage;
+import com.edgescheduler.notificationservice.message.KafkaEventMessage;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -47,24 +47,24 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ReactiveKafkaProducerTemplate<String, EventMessage> producerTemplate(
+    public ReactiveKafkaProducerTemplate<String, KafkaEventMessage> producerTemplate(
         KafkaProperties properties
     ) {
         Map<String, Object> producerProperties = properties.buildProducerProperties();
-        SenderOptions<String, EventMessage> senderOptions = SenderOptions.create(
+        SenderOptions<String, KafkaEventMessage> senderOptions = SenderOptions.create(
             producerProperties);
         return new ReactiveKafkaProducerTemplate<>(senderOptions);
     }
 
     @Bean
-    public ReactiveKafkaConsumerTemplate<String, EventMessage> consumerTemplate(
+    public ReactiveKafkaConsumerTemplate<String, KafkaEventMessage> consumerTemplate(
         KafkaProperties properties
     ) {
         Map<String, Object> consumerProperties = properties.buildConsumerProperties();
         consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
             KafkaMessageJsonDeserializer.class);
         log.info("Consumer properties: {}", consumerProperties);
-        ReceiverOptions<String, EventMessage> receiverOptions = ReceiverOptions.create(
+        ReceiverOptions<String, KafkaEventMessage> receiverOptions = ReceiverOptions.create(
             consumerProperties);
         receiverOptions = receiverOptions.subscription(
             List.of(meetingCreatedTopic, meetingDeletedTopic, meetingUpdatedTopic,

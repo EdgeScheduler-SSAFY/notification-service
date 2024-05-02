@@ -2,7 +2,7 @@ package com.edgescheduler.notificationservice.config.deserializer;
 
 import com.edgescheduler.notificationservice.message.AttendeeProposalMessage;
 import com.edgescheduler.notificationservice.message.AttendeeResponseMessage;
-import com.edgescheduler.notificationservice.message.EventMessage;
+import com.edgescheduler.notificationservice.message.KafkaEventMessage;
 import com.edgescheduler.notificationservice.message.MeetingCreateMessage;
 import com.edgescheduler.notificationservice.message.MeetingDeleteMessage;
 import com.edgescheduler.notificationservice.message.MeetingUpdateMessage;
@@ -13,19 +13,19 @@ import org.apache.kafka.common.header.Headers;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 @Slf4j
-public class KafkaMessageJsonDeserializer extends JsonDeserializer<EventMessage> {
+public class KafkaMessageJsonDeserializer extends JsonDeserializer<KafkaEventMessage> {
 
     public KafkaMessageJsonDeserializer() {
-        super(EventMessage.class);
+        super(KafkaEventMessage.class);
     }
 
     @Override
-    public EventMessage deserialize(String topic, byte[] data) {
+    public KafkaEventMessage deserialize(String topic, byte[] data) {
 
         try {
             JsonNode jsonNode = objectMapper.readTree(data);
             log.info("jsonNode = {}", jsonNode.toString());
-            Class<? extends EventMessage> targetClass = getTargetClass(topic);
+            Class<? extends KafkaEventMessage> targetClass = getTargetClass(topic);
             log.info("targetClass: {}", targetClass);
             return objectMapper.treeToValue(jsonNode, targetClass);
         } catch (IOException e) {
@@ -34,11 +34,11 @@ public class KafkaMessageJsonDeserializer extends JsonDeserializer<EventMessage>
     }
 
     @Override
-    public EventMessage deserialize(String topic, Headers headers, byte[] data) {
+    public KafkaEventMessage deserialize(String topic, Headers headers, byte[] data) {
         return deserialize(topic, data);
     }
 
-    private Class<? extends EventMessage> getTargetClass(String topic) {
+    private Class<? extends KafkaEventMessage> getTargetClass(String topic) {
         return switch (topic) {
             case "meeting-created" -> MeetingCreateMessage.class;
             case "meeting-deleted" -> MeetingDeleteMessage.class;

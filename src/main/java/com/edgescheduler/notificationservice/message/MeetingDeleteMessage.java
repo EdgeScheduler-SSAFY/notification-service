@@ -9,7 +9,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder
 @NoArgsConstructor
-public class MeetingDeleteMessage extends EventMessage {
+public class MeetingDeleteMessage extends KafkaEventMessage {
 
     private Long scheduleId;
     private String scheduleName;

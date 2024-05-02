@@ -8,7 +8,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder
 @NoArgsConstructor
-public class AttendeeResponseEvent extends NotificationEvent {
+public class AttendeeResponseSseEvent extends NotificationSseEvent {
 
     private Integer attendeeId;
     private String attendeeName;

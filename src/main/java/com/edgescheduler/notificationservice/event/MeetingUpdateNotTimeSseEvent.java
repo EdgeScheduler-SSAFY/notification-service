@@ -10,7 +10,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder
 @NoArgsConstructor
-public class ScheduleUpdateNotTimeEvent extends NotificationEvent {
+public class MeetingUpdateNotTimeSseEvent extends NotificationSseEvent {
 
     private Integer organizerId;
     private String organizerName;

@@ -9,7 +9,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder
 @NoArgsConstructor
-public class ScheduleCreateEvent extends NotificationEvent {
+public class MeetingCreateSseEvent extends NotificationSseEvent {
 
     private Integer organizerId;
     private String organizerName;

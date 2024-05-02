@@ -1,9 +1,8 @@
 package com.edgescheduler.notificationservice.service;
 
-import com.edgescheduler.notificationservice.message.EventMessage;
+import com.edgescheduler.notificationservice.message.KafkaEventMessage;
 import com.edgescheduler.notificationservice.message.MeetingCreateMessage;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +20,8 @@ import reactor.core.scheduler.Schedulers;
 public class KafkaService implements ApplicationRunner {
 
     private final EventSinkManager eventSinkManager;
-    private final ReactiveKafkaProducerTemplate<String, EventMessage> producerTemplate;
-    private final ReactiveKafkaConsumerTemplate<String, EventMessage> consumerTemplate;
+    private final ReactiveKafkaProducerTemplate<String, KafkaEventMessage> producerTemplate;
+    private final ReactiveKafkaConsumerTemplate<String, KafkaEventMessage> consumerTemplate;
     private final NotificationService notificationService;
 
     public Mono<String> publish(String topic, String message) {
