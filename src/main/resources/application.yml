@@ -22,4 +22,4 @@ spring:
       authentication-database: admin
   config:
     import:
-      - optional:env/env.yml
+      - optional:env.yml
