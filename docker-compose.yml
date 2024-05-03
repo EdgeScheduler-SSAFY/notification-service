@@ -4,8 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    expose :
-      - 8000
+    ports:
+      - 8201:8080
     networks:
       - my-network
 

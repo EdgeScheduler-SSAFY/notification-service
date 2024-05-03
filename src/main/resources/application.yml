@@ -1,6 +1,9 @@
 spring:
   application:
     name: notification-service
+  cloud:
+    discovery:
+      enabled: false
   kafka:
     bootstrap-servers:
       - ${KAFKA_BOOTSTRAP_SERVER_1}
@@ -23,3 +26,19 @@ spring:
   config:
     import:
       - optional:env.yml
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  cloud:
+    discovery:
+      enabled: true
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:localhost}
+  instance:
+    hostname: ${SERVER_HOST:localhost}

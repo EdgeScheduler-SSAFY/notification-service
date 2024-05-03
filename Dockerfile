@@ -9,4 +9,4 @@ COPY ${JAR_FILE_PATH}/notification-service-0.0.1-SNAPSHOT.jar notification-servi
 # 실행시 사용할 환경 변수 설정 (예: 프로파일 설정)
 # ENV SPRING_PROFILES_ACTIVE=dev,oauth
 
-ENTRYPOINT ["java", "-jar", "./notification-service.jar"]
+ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=prod", "./notification-service.jar"]
