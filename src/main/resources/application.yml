@@ -34,6 +34,8 @@ spring:
   cloud:
     discovery:
       enabled: true
+server:
+  port: 8201
 eureka:
   client:
     register-with-eureka: true

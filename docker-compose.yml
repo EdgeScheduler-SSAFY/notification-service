@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - 8201:8080
+      - 8201:8201
     networks:
       - my-network
 
