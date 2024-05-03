@@ -1,6 +1,5 @@
 package com.edgescheduler.notificationservice.event;
 
-import com.edgescheduler.notificationservice.domain.Notification;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +17,4 @@ public abstract class NotificationSseEvent {
     private Long scheduleId;
     private String scheduleName;
     private Boolean isRead;
-
-    public abstract Notification toEntity();
 }

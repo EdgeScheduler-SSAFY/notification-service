@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.edgescheduler.notificationservice.domain.AttendeeResponseNotification;
 import com.edgescheduler.notificationservice.domain.MeetingCreateNotification;
 import com.edgescheduler.notificationservice.domain.MeetingUpdateTimeNotification;
+import com.edgescheduler.notificationservice.event.Response;
 import java.time.LocalDateTime;
 
 import com.edgescheduler.notificationservice.domain.Notification;
@@ -31,16 +32,16 @@ class NotificationRepositoryTest {
 
         var not1 = MeetingCreateNotification.builder()
             .receiverId(1)
-            .notifiedAt(LocalDateTime.now())
+            .occurredAt(LocalDateTime.now())
             .scheduleId(1L)
             .build();
 
         var not2 = AttendeeResponseNotification.builder()
             .receiverId(1)
-            .notifiedAt(LocalDateTime.now())
+            .occurredAt(LocalDateTime.now())
             .scheduleId(2L)
-            .attendeeId(2L)
-            .response("ACCEPTED")
+            .attendeeId(2)
+            .response(Response.ACCEPTED)
             .build();
 
         var prevStartTime = LocalDateTime.now();
@@ -48,7 +49,7 @@ class NotificationRepositoryTest {
 
         var not3 = MeetingUpdateTimeNotification.builder()
             .receiverId(1)
-            .notifiedAt(LocalDateTime.now())
+            .occurredAt(LocalDateTime.now())
             .scheduleId(3L)
             .previousStartTime(prevStartTime)
             .previousEndTime(prevStartTime.plusMinutes(30))

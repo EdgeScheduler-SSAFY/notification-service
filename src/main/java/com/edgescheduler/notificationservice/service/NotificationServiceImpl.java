@@ -71,7 +71,6 @@ public class NotificationServiceImpl implements NotificationService {
                             .scheduleId(message.getScheduleId())
                             .build())
                     .toList();
-                log.info("almost saveAll");
                 return notificationRepository.saveAll(notifications);
             }).map(notification -> MeetingCreateSseEvent.builder()
                 .id(notification.getId())

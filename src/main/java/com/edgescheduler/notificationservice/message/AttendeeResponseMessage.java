@@ -2,10 +2,12 @@ package com.edgescheduler.notificationservice.message;
 
 import com.edgescheduler.notificationservice.event.Response;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @Getter
 @SuperBuilder
+@NoArgsConstructor
 public class AttendeeResponseMessage extends KafkaEventMessage {
 
     private Long scheduleId;
