@@ -15,12 +15,12 @@ public class TestController {
 
     private final KafkaTestService kafkaService;
 
-    @PostMapping("/meeting-create")
+    @PostMapping("/meeting-created")
     public Mono<String> test(){
         return kafkaService.publishMeetingCreateEvent();
     }
 
-    @PostMapping("/meeting-delete")
+    @PostMapping("/meeting-deleted")
     public Mono<String> test2(){
         return kafkaService.publicMeetingDeleteEvent();
     }
