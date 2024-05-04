@@ -23,7 +23,7 @@ public class EventSinkManager {
                 .id(String.valueOf(lastEventId))
                 .event("connected")
                 .data("Connected Successfully").build());
-            resendMissedEvents(userId, lastEventId, sink);
+//            resendMissedEvents(userId, lastEventId, sink);
             return true;
         }
         return false;
