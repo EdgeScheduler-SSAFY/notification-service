@@ -27,7 +27,7 @@ public class NotificationEventConverter {
                 (MeetingDeleteSseEvent) notificationEvent);
             case ATTENDEE_RESPONSE -> convertToAttendeeResponseNotification(
                 (AttendeeResponseSseEvent) notificationEvent);
-            case ATTENDEE_SCHEDULE_PROPOSAL -> convertToAttendeeProposalNotification(
+            case ATTENDEE_PROPOSAL -> convertToAttendeeProposalNotification(
                 (AttendeeProposalSseEvent) notificationEvent);
         };
     }

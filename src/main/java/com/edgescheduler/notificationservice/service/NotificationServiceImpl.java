@@ -164,7 +164,7 @@ public class NotificationServiceImpl implements NotificationService {
                 return notificationRepository.save(notification);
             }).map(notification -> AttendeeProposalSseEvent.builder()
                 .id(notification.getId())
-                .type(NotificationType.ATTENDEE_SCHEDULE_PROPOSAL)
+                .type(NotificationType.ATTENDEE_PROPOSAL)
                 .receiverId(notification.getReceiverId())
                 .occurredAt(notification.getOccurredAt())
                 .isRead(notification.getIsRead())

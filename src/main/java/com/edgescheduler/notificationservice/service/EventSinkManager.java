@@ -1,5 +1,6 @@
 package com.edgescheduler.notificationservice.service;
 
+import com.edgescheduler.notificationservice.event.NotificationSseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,11 +34,11 @@ public class EventSinkManager {
         userEventSinks.remove(userId);
     }
 
-    public boolean sendEvent(Integer userId, Object event) {
+    public boolean sendEvent(Integer userId, String eventType, Object event) {
         var sink = userEventSinks.get(userId);
         var sseEvent = ServerSentEvent.builder()
             .id(String.valueOf(counter.incrementAndGet()))
-            .event("notification")
+            .event(eventType)
             .data(event)
             .build();
         if (sink == null) {

@@ -28,7 +28,7 @@ public class KafkaService implements ApplicationRunner {
                 return notificationService.saveNotificationFromEventMessage(record.value());
             })
             .doOnNext(event -> {
-                eventSinkManager.sendEvent(event.getReceiverId(), event);
+                eventSinkManager.sendEvent(event.getReceiverId(), event.getType().toString(), event);
             })
             .doOnError(error -> log.error("Error consuming message: {}", error.getMessage()))
             .subscribe();
