@@ -74,6 +74,7 @@ public class KafkaTestService {
             .attendeeName("Attendee")
             .proposedStartTime(LocalDateTime.now().plusHours(1))
             .proposedEndTime(LocalDateTime.now().plusHours(2))
+            .reason("Reason")
             .build();
         return producerTemplate.send("attendee-proposal", attendeeProposalMessage)
             .map(result -> result.recordMetadata().toString());
