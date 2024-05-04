@@ -19,11 +19,11 @@ public class NotificationEventConverter {
 
     public static Notification convertToNotification(NotificationSseEvent notificationEvent) {
         return switch (notificationEvent.getType()) {
-            case SCHEDULE_CREATED -> convertToScheduleCreateNotification(
+            case MEETING_CREATED -> convertToScheduleCreateNotification(
                 (MeetingCreateSseEvent) notificationEvent);
-            case SCHEDULE_UPDATED -> convertToScheduleUpdateNotTimeNotification(
+            case MEETING_UPDATED -> convertToScheduleUpdateNotTimeNotification(
                 (MeetingUpdateNotTimeSseEvent) notificationEvent);
-            case SCHEDULE_DELETED -> convertToScheduleDeleteNotification(
+            case MEETING_DELETED -> convertToScheduleDeleteNotification(
                 (MeetingDeleteSseEvent) notificationEvent);
             case ATTENDEE_RESPONSE -> convertToAttendeeResponseNotification(
                 (AttendeeResponseSseEvent) notificationEvent);

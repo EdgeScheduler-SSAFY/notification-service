@@ -1,9 +1,9 @@
 package com.edgescheduler.notificationservice.event;
 
 public enum NotificationType {
-    SCHEDULE_CREATED,
-    SCHEDULE_UPDATED,
-    SCHEDULE_DELETED,
+    MEETING_CREATED,
+    MEETING_UPDATED,
+    MEETING_DELETED,
     ATTENDEE_RESPONSE,
     ATTENDEE_SCHEDULE_PROPOSAL
 }
