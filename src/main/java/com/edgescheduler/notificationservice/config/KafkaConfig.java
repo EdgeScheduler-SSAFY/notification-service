@@ -33,12 +33,9 @@ public class KafkaConfig {
     private String attendeeResponseTopic;
     @Value("${kafka.topic.attendee-proposal}")
     private String attendeeProposalTopic;
-    @Value("${MONGO_INITDB_ROOT_PASSWORD}")
-    private String mongoPassword;
 
     @Bean
     public NewTopics notification() {
-        log.info("mongoPassword: {}", mongoPassword);
         return new NewTopics(
             TopicBuilder.name(meetingCreatedTopic).partitions(3).replicas(2).build(),
             TopicBuilder.name(meetingDeletedTopic).partitions(3).replicas(2).build(),
@@ -66,7 +63,6 @@ public class KafkaConfig {
         Map<String, Object> consumerProperties = properties.buildConsumerProperties();
         consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
             KafkaMessageJsonDeserializer.class);
-        log.info("Consumer properties: {}", consumerProperties);
         ReceiverOptions<String, KafkaEventMessage> receiverOptions = ReceiverOptions.create(
             consumerProperties);
         receiverOptions = receiverOptions.subscription(
