@@ -50,7 +50,7 @@ public class KafkaConfig {
     public ReactiveKafkaProducerTemplate<String, KafkaEventMessage> producerTemplate(
         KafkaProperties properties
     ) {
-        Map<String, Object> producerProperties = properties.buildProducerProperties();
+        Map<String, Object> producerProperties = properties.buildProducerProperties(null);
         SenderOptions<String, KafkaEventMessage> senderOptions = SenderOptions.create(
             producerProperties);
         return new ReactiveKafkaProducerTemplate<>(senderOptions);
@@ -60,7 +60,7 @@ public class KafkaConfig {
     public ReactiveKafkaConsumerTemplate<String, KafkaEventMessage> consumerTemplate(
         KafkaProperties properties
     ) {
-        Map<String, Object> consumerProperties = properties.buildConsumerProperties();
+        Map<String, Object> consumerProperties = properties.buildConsumerProperties(null);
         consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
             KafkaMessageJsonDeserializer.class);
         ReceiverOptions<String, KafkaEventMessage> receiverOptions = ReceiverOptions.create(

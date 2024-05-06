@@ -29,7 +29,7 @@ public class KafkaTestService {
             .organizerName("Organizer")
             .startTime(LocalDateTime.now())
             .endTime(LocalDateTime.now().plusHours(1))
-            .attendeeIds(IntStream.range(1, 100).boxed().toList())
+            .attendeeIds(IntStream.range(1, 10).boxed().toList())
             .build();
         return producerTemplate.send("meeting-created", meetingCreateMessage)
             .map(result -> result.recordMetadata().toString());
@@ -44,7 +44,7 @@ public class KafkaTestService {
             .organizerName("Organizer")
             .startTime(LocalDateTime.now())
             .endTime(LocalDateTime.now().plusHours(1))
-            .attendeeIds(IntStream.range(1, 100).boxed().toList())
+            .attendeeIds(IntStream.range(1, 10).boxed().toList())
             .build();
         return producerTemplate.send("meeting-deleted", meetingDeleteMessage)
             .map(result -> result.recordMetadata().toString());

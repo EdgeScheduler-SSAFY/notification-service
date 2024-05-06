@@ -1,5 +1,6 @@
 package com.edgescheduler.notificationservice.controller;
 
+import com.edgescheduler.notificationservice.service.EmailService;
 import com.edgescheduler.notificationservice.service.KafkaTestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import reactor.core.publisher.Mono;
 public class TestController {
 
     private final KafkaTestService kafkaService;
+    private final EmailService emailService;
 
     @PostMapping("/meeting-created")
     public Mono<String> test(){
@@ -33,5 +35,11 @@ public class TestController {
     @PostMapping("/attendee-proposal")
     public Mono<String> test4(){
         return kafkaService.publishAttendeeProposalEvent();
+    }
+
+    @PostMapping("/send-email")
+    public Mono<String> test5(){
+        return emailService.sendEmail("oh052679@naver.com", "해치웠나?", "제발...!")
+            .flatMap(mimeMessage -> Mono.just("Email sent"));
     }
 }

@@ -38,6 +38,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public Publisher<NotificationSseEvent> saveNotificationFromEventMessage(KafkaEventMessage eventMessage) {
 
+        log.info("Received event message: {}", eventMessage.getOccurredAt());
         if (eventMessage instanceof MeetingCreateMessage meetingCreateMessage) {
             return saveAndGetMeetingCreateEvent(meetingCreateMessage);
         }
@@ -72,7 +73,9 @@ public class NotificationServiceImpl implements NotificationService {
                             .build())
                     .toList();
                 return notificationRepository.saveAll(notifications);
-            }).map(notification -> MeetingCreateSseEvent.builder()
+            }).map(notification -> {
+                log.info("Notification saved: {}", notification.getId());
+                return MeetingCreateSseEvent.builder()
                 .id(notification.getId())
                 .receiverId(notification.getReceiverId())
                 .type(NotificationType.MEETING_CREATED)
@@ -84,7 +87,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .startTime(meetingCreateMessage.getStartTime())
                 .endTime(meetingCreateMessage.getEndTime())
                 .isRead(notification.getIsRead())
-                .build());
+                .build();});
     }
 
     private Flux<NotificationSseEvent> saveAndGetMeetingUpdateEvent(MeetingUpdateMessage meetingUpdateMessage) {
