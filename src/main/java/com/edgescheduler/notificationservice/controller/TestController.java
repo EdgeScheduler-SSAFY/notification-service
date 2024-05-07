@@ -30,6 +30,11 @@ public class TestController {
         return kafkaService.publicMeetingDeleteEvent();
     }
 
+    @PostMapping("/meeting-updated")
+    public Mono<String> test7(){
+        return kafkaService.publishMeetingUpdateEvent();
+    }
+
     @PostMapping("/attendee-response")
     public Mono<String> test3(){
         return kafkaService.publishAttendeeResponseEvent();

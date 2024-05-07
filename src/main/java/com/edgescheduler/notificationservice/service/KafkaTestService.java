@@ -2,12 +2,15 @@ package com.edgescheduler.notificationservice.service;
 
 
 import com.edgescheduler.notificationservice.event.Response;
+import com.edgescheduler.notificationservice.event.UpdatedField;
 import com.edgescheduler.notificationservice.message.AttendeeProposalMessage;
 import com.edgescheduler.notificationservice.message.AttendeeResponseMessage;
 import com.edgescheduler.notificationservice.message.KafkaEventMessage;
 import com.edgescheduler.notificationservice.message.MeetingCreateMessage;
 import com.edgescheduler.notificationservice.message.MeetingDeleteMessage;
+import com.edgescheduler.notificationservice.message.MeetingUpdateMessage;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate;
@@ -77,6 +80,27 @@ public class KafkaTestService {
             .reason("Reason")
             .build();
         return producerTemplate.send("attendee-proposal", attendeeProposalMessage)
+            .map(result -> result.recordMetadata().toString());
+    }
+
+    public Mono<String> publishMeetingUpdateEvent() {
+        MeetingUpdateMessage meetingUpdateMessage = MeetingUpdateMessage.builder()
+            .occurredAt(LocalDateTime.now())
+            .scheduleId(1L)
+            .scheduleName("Meeting")
+            .organizerId(2)
+            .organizerName("Organizer")
+            .updatedFields(List.of(UpdatedField.TIME, UpdatedField.TITLE))
+            .previousStartTime(LocalDateTime.now())
+            .previousEndTime(LocalDateTime.now().plusHours(1))
+            .updatedStartTime(LocalDateTime.now().plusHours(1))
+            .updatedEndTime(LocalDateTime.now().plusHours(2))
+            .attendeeIds(IntStream.range(1, 10).boxed().toList())
+            .maintainedAttendeeIds(IntStream.range(1, 5).boxed().toList())
+            .addedAttendeeIds(IntStream.range(10, 13).boxed().toList())
+            .removedAttendeeIds(IntStream.range(5, 10).boxed().toList())
+            .build();
+        return producerTemplate.send("meeting-updated", meetingUpdateMessage)
             .map(result -> result.recordMetadata().toString());
     }
 }

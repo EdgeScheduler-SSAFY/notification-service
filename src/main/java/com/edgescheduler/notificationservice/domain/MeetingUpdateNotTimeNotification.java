@@ -13,6 +13,5 @@ import org.springframework.data.annotation.TypeAlias;
 @TypeAlias("meetingUpdateNotTime")
 public class MeetingUpdateNotTimeNotification extends Notification {
     private Long scheduleId;
-    private String updatedName;
     private List<UpdatedField> updatedFields;
 }
