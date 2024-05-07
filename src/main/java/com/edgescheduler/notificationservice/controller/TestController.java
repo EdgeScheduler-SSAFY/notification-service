@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @RestController
 @RequiredArgsConstructor
@@ -47,7 +48,7 @@ public class TestController {
     }
 
     @GetMapping("/user-service/uncheck")
-    public String test6(){
-        return userServiceClient.uncheck();
+    public Mono<String> test6(){
+        return Mono.fromCallable(userServiceClient::uncheck).subscribeOn(Schedulers.boundedElastic());
     }
 }
