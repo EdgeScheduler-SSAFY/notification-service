@@ -47,7 +47,7 @@ public class TestController {
     }
 
     @GetMapping("/user-service/uncheck")
-    public Mono<String> test6(){
-        return Mono.just(userServiceClient.uncheck());
+    public String test6(){
+        return userServiceClient.uncheck();
     }
 }
