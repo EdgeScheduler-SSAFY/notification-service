@@ -14,4 +14,8 @@ public class AttendeeResponseNotification extends Notification {
     private Long scheduleId;
     private Integer attendeeId;
     private Response response;
+
+    // temporary
+    private String scheduleName;
+    private String attendeeName;
 }

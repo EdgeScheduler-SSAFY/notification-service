@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import reactor.core.publisher.Flux;
 
-public interface NotificationRepository extends ReactiveMongoRepository<Notification, String> {
+public interface NotificationRepository extends ReactiveMongoRepository<Notification, String>, CustomNotificationRepository {
 
-    Flux<Notification> findByReceiverId(Integer receiverId);
+    Flux<Notification> findByReceiverIdAndOccurredAtGreaterThanEqual(Integer receiverId, LocalDateTime occurredAt);
 }

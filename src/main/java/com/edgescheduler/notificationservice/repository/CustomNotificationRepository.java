@@ -1,8 +1,10 @@
 package com.edgescheduler.notificationservice.repository;
 
+import reactor.core.publisher.Mono;
+
 public interface CustomNotificationRepository {
 
-    void markAsRead(Integer notificationId);
+    Mono<Void> markAsRead(Integer notificationId);
 
-    void markAllAsRead(Integer receiverId);
+    Mono<Void> markAllAsRead(Integer receiverId);
 }

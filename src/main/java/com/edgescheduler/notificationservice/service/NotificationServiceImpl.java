@@ -2,23 +2,26 @@ package com.edgescheduler.notificationservice.service;
 
 import com.edgescheduler.notificationservice.domain.AttendeeProposalNotification;
 import com.edgescheduler.notificationservice.domain.AttendeeResponseNotification;
+import com.edgescheduler.notificationservice.domain.MeetingCreateNotification;
 import com.edgescheduler.notificationservice.domain.MeetingDeleteNotification;
 import com.edgescheduler.notificationservice.domain.Notification;
-import com.edgescheduler.notificationservice.domain.MeetingCreateNotification;
 import com.edgescheduler.notificationservice.event.AttendeeProposalSseEvent;
 import com.edgescheduler.notificationservice.event.AttendeeResponseSseEvent;
-import com.edgescheduler.notificationservice.event.NotificationSseEvent;
-import com.edgescheduler.notificationservice.event.NotificationType;
 import com.edgescheduler.notificationservice.event.MeetingCreateSseEvent;
 import com.edgescheduler.notificationservice.event.MeetingDeleteSseEvent;
+import com.edgescheduler.notificationservice.event.NotificationSseEvent;
+import com.edgescheduler.notificationservice.event.NotificationType;
 import com.edgescheduler.notificationservice.message.AttendeeProposalMessage;
 import com.edgescheduler.notificationservice.message.AttendeeResponseMessage;
 import com.edgescheduler.notificationservice.message.KafkaEventMessage;
 import com.edgescheduler.notificationservice.message.MeetingCreateMessage;
 import com.edgescheduler.notificationservice.message.MeetingDeleteMessage;
 import com.edgescheduler.notificationservice.message.MeetingUpdateMessage;
-import com.edgescheduler.notificationservice.repository.MemberTimezoneRepository;
 import com.edgescheduler.notificationservice.repository.NotificationRepository;
+import com.edgescheduler.notificationservice.util.NotificationEventConverter;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +36,7 @@ import reactor.core.publisher.Mono;
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final MemberTimezoneRepository memberTimezoneRepository;
+    private final NotificationEventConverter notificationEventConverter;
 
     @Override
     public Publisher<NotificationSseEvent> saveNotificationFromEventMessage(KafkaEventMessage eventMessage) {
@@ -182,19 +185,20 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public Flux<NotificationSseEvent> getNotificationsByReceiverId(Integer receiverId) {
-        Flux<Notification> notifications = notificationRepository.findByReceiverId(receiverId);
-        return null;
+    public Flux<NotificationSseEvent> getNotificationsByReceiverIdWithin2Day(Integer receiverId) {
+        LocalDateTime now = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+        Flux<Notification> notifications = notificationRepository.findByReceiverIdAndOccurredAtGreaterThanEqual(receiverId, now.minusDays(2));
+        return notifications.flatMapSequential(notificationEventConverter::convert);
     }
 
     @Override
-    public void markAsRead(Integer notificationId) {
-
+    public Mono<Void> markAsRead(Integer notificationId) {
+        return notificationRepository.markAsRead(notificationId);
     }
 
     @Override
-    public void markAllAsRead(Integer receiverId) {
-
+    public Mono<Void> markAllAsRead(Integer receiverId) {
+        return notificationRepository.markAllAsRead(receiverId);
     }
 
 

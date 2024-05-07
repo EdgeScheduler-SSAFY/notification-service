@@ -16,4 +16,8 @@ public class AttendeeProposalNotification extends Notification {
     private LocalDateTime proposedStartTime;
     private LocalDateTime proposedEndTime;
     private String reason;
+
+    // temporary
+    private String scheduleName;
+    private String attendeeName;
 }
