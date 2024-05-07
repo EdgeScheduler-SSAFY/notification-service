@@ -1,10 +1,9 @@
 package com.edgescheduler.notificationservice.controller;
 
-import com.edgescheduler.notificationservice.feign.client.UserServiceClient;
+import com.edgescheduler.notificationservice.service.UserServiceClient;
 import com.edgescheduler.notificationservice.service.EmailService;
 import com.edgescheduler.notificationservice.service.KafkaTestService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,6 +48,6 @@ public class TestController {
 
     @GetMapping("/user-service/uncheck")
     public Mono<String> test6(){
-        return Mono.fromCallable(userServiceClient::uncheck).subscribeOn(Schedulers.boundedElastic());
+        return userServiceClient.getUncheck();
     }
 }
