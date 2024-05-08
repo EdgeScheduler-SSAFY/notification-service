@@ -1,4 +1,4 @@
-package com.edgescheduler.notificationservice.service;
+package com.edgescheduler.notificationservice.client;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -15,7 +15,7 @@ public class UserServiceClient {
 
     public Mono<String> getUncheck() {
         return webClient.get()
-            .uri("/uncheck")
+            .uri("/check")
             .retrieve().bodyToMono(String.class);
     }
 }
