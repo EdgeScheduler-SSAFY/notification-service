@@ -1,6 +1,6 @@
 package com.edgescheduler.notificationservice.controller;
 
-import com.edgescheduler.notificationservice.service.UserServiceClient;
+import com.edgescheduler.notificationservice.client.UserServiceClient;
 import com.edgescheduler.notificationservice.service.EmailService;
 import com.edgescheduler.notificationservice.service.KafkaTestService;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 @RestController
 @RequiredArgsConstructor
