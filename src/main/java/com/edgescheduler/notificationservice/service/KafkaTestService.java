@@ -95,7 +95,6 @@ public class KafkaTestService {
             .previousEndTime(LocalDateTime.now().plusHours(1))
             .updatedStartTime(LocalDateTime.now().plusHours(1))
             .updatedEndTime(LocalDateTime.now().plusHours(2))
-            .attendeeIds(IntStream.range(1, 10).boxed().toList())
             .maintainedAttendeeIds(IntStream.range(1, 5).boxed().toList())
             .addedAttendeeIds(IntStream.range(10, 13).boxed().toList())
             .removedAttendeeIds(IntStream.range(5, 10).boxed().toList())

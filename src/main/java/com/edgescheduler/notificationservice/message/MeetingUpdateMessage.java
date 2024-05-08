@@ -20,7 +20,6 @@ public class MeetingUpdateMessage extends KafkaEventMessage {
     private LocalDateTime previousEndTime;
     private LocalDateTime updatedStartTime;
     private LocalDateTime updatedEndTime;
-    private List<Integer> attendeeIds;
     private List<Integer> maintainedAttendeeIds;
     private List<Integer> addedAttendeeIds;
     private List<Integer> removedAttendeeIds;
