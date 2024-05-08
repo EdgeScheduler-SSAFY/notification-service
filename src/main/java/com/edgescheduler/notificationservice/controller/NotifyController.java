@@ -19,14 +19,14 @@ public class NotifyController {
 
     private final EventSinkManager eventSinkManager;
 
-    @GetMapping(path = "/notify", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(path = "/notify/{memberId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     Flux<ServerSentEvent<Object>> sse(
-        @RequestHeader("Authorization") Integer userId,
-        @RequestHeader(name = "Last-Event-ID", required = false, defaultValue = "0") Long lastEventId
-    ) {
+        @RequestHeader(name = "Authorization", required = false) Integer userId,
+        @RequestHeader(name = "Last-Event-ID", required = false, defaultValue = "0") Long lastEventId,
+        @PathVariable Integer memberId) {
         return Flux.<ServerSentEvent<Object>>create(sink -> {
-                if (eventSinkManager.addEventSink(userId, sink, lastEventId)) {
-                    sink.onDispose(() -> eventSinkManager.removeEventSink(userId));
+                if (eventSinkManager.addEventSink(memberId, sink, lastEventId)) {
+                    sink.onDispose(() -> eventSinkManager.removeEventSink(memberId));
                 } else {
                     sink.error(ErrorCode.DUPLICATE_CONNECTION.build());
                 }
