@@ -19,9 +19,9 @@ public class NotifyController {
 
     private final EventSinkManager eventSinkManager;
 
-    @GetMapping(path = "/notify/{userId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(path = "/notify", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     Flux<ServerSentEvent<Object>> sse(
-        @PathVariable Integer userId,
+        @RequestHeader("Authorization") Integer userId,
         @RequestHeader(name = "Last-Event-ID", required = false, defaultValue = "0") Long lastEventId
     ) {
         return Flux.<ServerSentEvent<Object>>create(sink -> {

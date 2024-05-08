@@ -9,7 +9,7 @@ import com.edgescheduler.notificationservice.domain.MeetingUpdateTimeNotificatio
 import com.edgescheduler.notificationservice.domain.Notification;
 import com.edgescheduler.notificationservice.event.MeetingCreateSseEvent;
 import com.edgescheduler.notificationservice.event.NotificationSseEvent;
-import com.edgescheduler.notificationservice.service.UserServiceClient;
+import com.edgescheduler.notificationservice.client.UserServiceClient;
 import com.edgescheduler.notificationservice.service.MemberTimezoneService;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;

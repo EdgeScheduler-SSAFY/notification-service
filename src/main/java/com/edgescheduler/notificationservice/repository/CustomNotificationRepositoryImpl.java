@@ -24,7 +24,8 @@ public class CustomNotificationRepositoryImpl implements CustomNotificationRepos
 
     @Override
     public Mono<Void> markAllAsRead(Integer receiverId) {
-        return mongoTemplate.updateMulti(query(where("receiverId").is(receiverId)),
+        return mongoTemplate.updateMulti(
+            query(where("receiverId").is(receiverId).and("isRead").is(false)),
             new Update().set("isRead", true), Notification.class).then();
     }
 }
