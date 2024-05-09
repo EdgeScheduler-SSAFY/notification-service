@@ -321,13 +321,13 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public Mono<Void> markAsRead(Integer notificationId) {
+    public Mono<Void> markAsRead(Long notificationId) {
         return notificationRepository.markAsRead(notificationId);
     }
 
     @Override
-    public Mono<Void> markAllAsRead(Integer receiverId) {
-        return notificationRepository.markAllAsRead(receiverId);
+    public Mono<Void> markAllAsRead(List<Long> notificationIds) {
+        return notificationRepository.markAllAsRead(notificationIds);
     }
 
 

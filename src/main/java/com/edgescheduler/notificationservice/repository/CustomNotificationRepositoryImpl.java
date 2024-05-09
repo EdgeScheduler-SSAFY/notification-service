@@ -4,6 +4,7 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
 import com.edgescheduler.notificationservice.domain.Notification;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Update;
@@ -17,15 +18,15 @@ public class CustomNotificationRepositoryImpl implements CustomNotificationRepos
     ReactiveMongoTemplate mongoTemplate;
 
     @Override
-    public Mono<Void> markAsRead(Integer notificationId) {
+    public Mono<Void> markAsRead(Long notificationId) {
         return mongoTemplate.updateFirst(query(where("id").is(notificationId)),
             new Update().set("isRead", true), Notification.class).then();
     }
 
     @Override
-    public Mono<Void> markAllAsRead(Integer receiverId) {
+    public Mono<Void> markAllAsRead(List<Long> notificationIds) {
         return mongoTemplate.updateMulti(
-            query(where("receiverId").is(receiverId).and("isRead").is(false)),
+            query(where("_id").in(notificationIds).and("isRead").is(false)),
             new Update().set("isRead", true), Notification.class).then();
     }
 }
