@@ -46,7 +46,7 @@ public class NotifyController {
     public Mono<Map<String, Object>> readNotification(@PathVariable Long id) {
         return notificationService.markAsRead(id)
             .then(Mono.defer(
-                () -> Mono.just(Map.of("id", id, "isRead", Boolean.TRUE))));
+                () -> Mono.just(Map.of("id", id, "status", "success"))));
     }
 
     @PostMapping("/notifications/read-all")
@@ -56,6 +56,6 @@ public class NotifyController {
             throw ErrorCode.REQUEST_VALIDATION.build("ids");
         }
         return notificationService.markAllAsRead(ids)
-            .then(Mono.just(Map.of("ids", ids, "isRead", Boolean.TRUE)));
+            .then(Mono.just(Map.of("ids", ids, "status", "success")));
     }
 }
