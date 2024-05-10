@@ -12,5 +12,9 @@ public class MemberTimezone {
 
     @Id
     private Integer memberId;
-    private String timezone;
+    private String zoneId;
+
+    public void changeZoneId(String timezone) {
+        this.zoneId = timezone;
+    }
 }

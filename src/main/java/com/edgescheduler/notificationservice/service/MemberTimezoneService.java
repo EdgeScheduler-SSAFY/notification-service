@@ -20,7 +20,7 @@ public class MemberTimezoneService {
         return Mono.justOrEmpty(memberTimezoneMap.get(memberId))
             .switchIfEmpty(memberTimezoneRepository.findById(memberId)
                 .map(memberTimezone -> {
-                    ZoneId zoneId = ZoneId.of(memberTimezone.getTimezone());
+                    ZoneId zoneId = ZoneId.of(memberTimezone.getZoneId());
                     memberTimezoneMap.put(memberId, zoneId);
                     return zoneId;
                 }));

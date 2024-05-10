@@ -1,6 +1,7 @@
 package com.edgescheduler.notificationservice.config;
 
-import com.edgescheduler.notificationservice.config.deserializer.KafkaMessageJsonDeserializer;
+import com.edgescheduler.notificationservice.config.deserializer.ChangeTimeZoneMessageDeserializer;
+import com.edgescheduler.notificationservice.config.deserializer.NotificationMessageJsonDeserializer;
 import com.edgescheduler.notificationservice.message.ChangeTimeZoneMessage;
 import com.edgescheduler.notificationservice.message.KafkaEventMessage;
 import java.util.List;
@@ -16,7 +17,6 @@ import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.KafkaAdmin.NewTopics;
 import org.springframework.kafka.core.reactive.ReactiveKafkaConsumerTemplate;
 import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
 import reactor.kafka.receiver.ReceiverOptions;
 import reactor.kafka.sender.SenderOptions;
 
@@ -66,7 +66,7 @@ public class KafkaConfig {
     ) {
         Map<String, Object> consumerProperties = properties.buildConsumerProperties(null);
         consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-            KafkaMessageJsonDeserializer.class);
+            NotificationMessageJsonDeserializer.class);
         ReceiverOptions<String, KafkaEventMessage> receiverOptions = ReceiverOptions.create(
             consumerProperties);
         receiverOptions = receiverOptions.subscription(
@@ -81,7 +81,7 @@ public class KafkaConfig {
     ) {
         Map<String, Object> consumerProperties = properties.buildConsumerProperties(null);
         consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-            JsonDeserializer.class);
+            ChangeTimeZoneMessageDeserializer.class);
         ReceiverOptions<String, ChangeTimeZoneMessage> receiverOptions = ReceiverOptions.create(
             consumerProperties);
         receiverOptions = receiverOptions.subscription(List.of(timeZoneConfiguredTopic));

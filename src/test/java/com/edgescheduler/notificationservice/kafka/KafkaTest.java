@@ -2,7 +2,7 @@ package com.edgescheduler.notificationservice.kafka;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.edgescheduler.notificationservice.config.deserializer.KafkaMessageJsonDeserializer;
+import com.edgescheduler.notificationservice.config.deserializer.NotificationMessageJsonDeserializer;
 import com.edgescheduler.notificationservice.event.Response;
 import com.edgescheduler.notificationservice.event.UpdatedField;
 import com.edgescheduler.notificationservice.message.AttendeeResponseMessage;
@@ -76,7 +76,7 @@ public class KafkaTest {
 
     private static ReceiverOptions<String, KafkaEventMessage> receiverOptions(
         Map<String, Object> props) {
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaMessageJsonDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, NotificationMessageJsonDeserializer.class);
         ReceiverOptions<String, KafkaEventMessage> options = ReceiverOptions.create(props);
         return options.consumerProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
             .subscription(
@@ -183,7 +183,6 @@ public class KafkaTest {
             .organizerName("Organizer")
             .updatedStartTime(LocalDateTime.now().plusHours(1))
             .updatedEndTime(LocalDateTime.now().plusHours(2))
-            .attendeeIds(IntStream.range(1, 100).boxed().toList())
             .maintainedAttendeeIds(IntStream.range(1, 40).boxed().toList())
             .removedAttendeeIds(IntStream.range(41, 60).boxed().toList())
             .addedAttendeeIds(IntStream.range(61, 100).boxed().toList())
