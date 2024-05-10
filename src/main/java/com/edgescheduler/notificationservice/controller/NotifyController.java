@@ -1,5 +1,8 @@
 package com.edgescheduler.notificationservice.controller;
 
+import com.edgescheduler.notificationservice.dto.NotificationHistory;
+import com.edgescheduler.notificationservice.dto.NotificationPage;
+import com.edgescheduler.notificationservice.event.NotificationSseEvent;
 import com.edgescheduler.notificationservice.exception.ErrorCode;
 import com.edgescheduler.notificationservice.service.EventSinkManager;
 import com.edgescheduler.notificationservice.service.NotificationService;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -28,7 +32,7 @@ public class NotifyController {
     private final NotificationService notificationService;
 
     @GetMapping(path = "/subscribe/{memberId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    Flux<ServerSentEvent<Object>> sse(
+    public Flux<ServerSentEvent<Object>> sse(
         @RequestHeader(name = "Authorization", required = false) Integer userId,
         @RequestHeader(name = "Last-Event-ID", required = false, defaultValue = "0") Long lastEventId,
         @PathVariable Integer memberId) {
@@ -40,6 +44,20 @@ public class NotifyController {
                 }
             }
         ).onBackpressureBuffer();
+    }
+
+    @GetMapping("/notifications/history")
+    public Mono<NotificationHistory> getNotifications(@RequestHeader(name = "Authorization") Integer userId) {
+        return notificationService.getNotificationsByReceiverIdWithin2Weeks(userId)
+            .collectList().map(data -> NotificationHistory.builder().data(data).build());
+    }
+
+    @GetMapping("/notifications/page")
+    public Mono<NotificationPage> getNotificationsPage(
+        @RequestHeader(name = "Authorization") Integer userId,
+        @RequestParam(name = "page", defaultValue = "0") Integer page,
+        @RequestParam(name = "size", defaultValue = "5") Integer size) {
+        return notificationService.getNotificationsByReceiverIdWithin2WeeksWithPaging(userId, page, size);
     }
 
     @PatchMapping("/notifications/{id}/read")

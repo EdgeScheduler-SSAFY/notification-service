@@ -1,5 +1,7 @@
 package com.edgescheduler.notificationservice.client;
 
+import lombok.Builder;
+import lombok.Getter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -17,5 +19,18 @@ public class UserServiceClient {
         return webClient.get()
             .uri("/check")
             .retrieve().bodyToMono(String.class);
+    }
+
+    public Mono<UserInfo> getUserInfo(Integer id) {
+        return webClient.get()
+            .uri("/members/{id}", id)
+            .retrieve().bodyToMono(UserInfo.class);
+    }
+
+    @Getter
+    @Builder
+    public static class UserInfo {
+        private Integer id;
+        private String name;
     }
 }

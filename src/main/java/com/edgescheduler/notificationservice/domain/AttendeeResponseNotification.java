@@ -16,6 +16,6 @@ public class AttendeeResponseNotification extends Notification {
     private Response response;
 
     // temporary
-    private String scheduleName;
-    private String attendeeName;
+//    private String scheduleName;
+//    private String attendeeName;
 }

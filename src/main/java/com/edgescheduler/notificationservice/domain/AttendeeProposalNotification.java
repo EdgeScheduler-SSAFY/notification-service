@@ -18,6 +18,6 @@ public class AttendeeProposalNotification extends Notification {
     private String reason;
 
     // temporary
-    private String scheduleName;
-    private String attendeeName;
+//    private String scheduleName;
+//    private String attendeeName;
 }

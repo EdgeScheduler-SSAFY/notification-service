@@ -7,6 +7,7 @@ import com.edgescheduler.notificationservice.domain.MeetingDeleteNotification;
 import com.edgescheduler.notificationservice.domain.MeetingUpdateNotTimeNotification;
 import com.edgescheduler.notificationservice.domain.MeetingUpdateTimeNotification;
 import com.edgescheduler.notificationservice.domain.Notification;
+import com.edgescheduler.notificationservice.dto.NotificationPage;
 import com.edgescheduler.notificationservice.event.AttendeeProposalSseEvent;
 import com.edgescheduler.notificationservice.event.AttendeeResponseSseEvent;
 import com.edgescheduler.notificationservice.event.MeetingCreateSseEvent;
@@ -31,6 +32,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.reactivestreams.Publisher;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -313,11 +315,33 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public Flux<NotificationSseEvent> getNotificationsByReceiverIdWithin2Day(Integer receiverId) {
+    public Flux<NotificationSseEvent> getNotificationsByReceiverIdWithin2Weeks(Integer receiverId) {
         LocalDateTime now = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
-        Flux<Notification> notifications = notificationRepository.findByReceiverIdAndOccurredAtGreaterThanEqual(
-            receiverId, now.minusDays(2));
+        Flux<Notification> notifications = notificationRepository.findNotificationsAfter(
+            receiverId, now.minusDays(14));
         return notifications.flatMapSequential(notificationEventConverter::convert);
+    }
+
+    @Override
+    public Mono<NotificationPage> getNotificationsByReceiverIdWithin2WeeksWithPaging(
+        Integer receiverId, Integer page, Integer size) {
+        return notificationRepository.findNotificationsAfterWithPaging(
+                receiverId, LocalDateTime.now().minusDays(14), PageRequest.of(page, size))
+            .flatMapSequential(notificationEventConverter::convert)
+            .collectList()
+            .zipWith(notificationRepository.countByReceiverIdAndOccurredAtGreaterThanEqual(
+                receiverId, LocalDateTime.now().minusDays(14)))
+            .map(tuple -> {
+                List<NotificationSseEvent> data = tuple.getT1();
+                Integer total = tuple.getT2();
+                return NotificationPage.builder()
+                    .page(page)
+                    .size(size)
+                    .totalPages((total + size - 1) / size)
+                    .totalElements(total)
+                    .data(data)
+                    .build();
+            });
     }
 
     @Override

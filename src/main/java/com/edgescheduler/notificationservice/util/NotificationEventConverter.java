@@ -1,5 +1,6 @@
 package com.edgescheduler.notificationservice.util;
 
+import com.edgescheduler.notificationservice.client.ScheduleServiceClient;
 import com.edgescheduler.notificationservice.domain.AttendeeProposalNotification;
 import com.edgescheduler.notificationservice.domain.AttendeeResponseNotification;
 import com.edgescheduler.notificationservice.domain.MeetingCreateNotification;
@@ -7,20 +8,29 @@ import com.edgescheduler.notificationservice.domain.MeetingDeleteNotification;
 import com.edgescheduler.notificationservice.domain.MeetingUpdateNotTimeNotification;
 import com.edgescheduler.notificationservice.domain.MeetingUpdateTimeNotification;
 import com.edgescheduler.notificationservice.domain.Notification;
+import com.edgescheduler.notificationservice.event.AttendeeProposalSseEvent;
+import com.edgescheduler.notificationservice.event.AttendeeResponseSseEvent;
 import com.edgescheduler.notificationservice.event.MeetingCreateSseEvent;
+import com.edgescheduler.notificationservice.event.MeetingDeleteSseEvent;
+import com.edgescheduler.notificationservice.event.MeetingUpdateNotTimeSseEvent;
+import com.edgescheduler.notificationservice.event.MeetingUpdateTimeSseEvent;
 import com.edgescheduler.notificationservice.event.NotificationSseEvent;
 import com.edgescheduler.notificationservice.client.UserServiceClient;
+import com.edgescheduler.notificationservice.event.NotificationType;
 import com.edgescheduler.notificationservice.service.MemberTimezoneService;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Component
 @RequiredArgsConstructor
 public class NotificationEventConverter {
 
     private final UserServiceClient userServiceClient;
+    private final ScheduleServiceClient scheduleServiceClient;
     private final MemberTimezoneService memberTimezoneService;
 
     public Mono<NotificationSseEvent> convert(Notification notification) {
@@ -48,42 +58,199 @@ public class NotificationEventConverter {
 
     private Mono<NotificationSseEvent> convertToAttendeeProposalSseEvent(
         AttendeeProposalNotification attendeeProposalNotification) {
-        return null;
+        return Mono.zip(
+                memberTimezoneService.getZoneIdOfMember(attendeeProposalNotification.getReceiverId())
+                    .subscribeOn(Schedulers.boundedElastic()),
+                scheduleServiceClient.getSchedule(attendeeProposalNotification.getScheduleId())
+                    .subscribeOn(Schedulers.boundedElastic()),
+                userServiceClient.getUserInfo(attendeeProposalNotification.getAttendeeId())
+                    .subscribeOn(Schedulers.boundedElastic()))
+            .map(tuple -> {
+                ZoneId memberTimezone = tuple.getT1();
+                var scheduleInfo = tuple.getT2();
+                var attendeeInfo = tuple.getT3();
+                LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(
+                    attendeeProposalNotification.getOccurredAt(), memberTimezone);
+                LocalDateTime zonedProposedStartTime = TimeZoneConvertUtils.convertToZone(
+                    attendeeProposalNotification.getProposedStartTime(), memberTimezone);
+                LocalDateTime zonedProposedEndTime = TimeZoneConvertUtils.convertToZone(
+                    attendeeProposalNotification.getProposedEndTime(), memberTimezone);
+                return AttendeeProposalSseEvent.builder()
+                    .id(attendeeProposalNotification.getId())
+                    .type(NotificationType.ATTENDEE_PROPOSAL)
+                    .receiverId(attendeeProposalNotification.getReceiverId())
+                    .occurredAt(zonedOccurredAt)
+                    .isRead(attendeeProposalNotification.getIsRead())
+                    .scheduleId(scheduleInfo.getScheduleId())
+                    .scheduleName(scheduleInfo.getName())
+                    .attendeeId(attendeeProposalNotification.getAttendeeId())
+                    .attendeeName(attendeeInfo.getName())
+                    .proposedStartTime(zonedProposedStartTime)
+                    .proposedEndTime(zonedProposedEndTime)
+                    .build();
+            });
     }
 
     private Mono<NotificationSseEvent> convertToAttendeeResponseSseEvent(
         AttendeeResponseNotification attendeeResponseNotification) {
-        return null;
+        return Mono.zip(
+                memberTimezoneService.getZoneIdOfMember(attendeeResponseNotification.getReceiverId())
+                    .subscribeOn(Schedulers.boundedElastic()),
+                scheduleServiceClient.getSchedule(attendeeResponseNotification.getScheduleId())
+                    .subscribeOn(Schedulers.boundedElastic()),
+                userServiceClient.getUserInfo(attendeeResponseNotification.getAttendeeId())
+                    .subscribeOn(Schedulers.boundedElastic()))
+            .map(tuple -> {
+                ZoneId memberTimezone = tuple.getT1();
+                var scheduleInfo = tuple.getT2();
+                var attendeeInfo = tuple.getT3();
+                LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(
+                    attendeeResponseNotification.getOccurredAt(), memberTimezone);
+                return AttendeeResponseSseEvent.builder()
+                    .id(attendeeResponseNotification.getId())
+                    .type(NotificationType.ATTENDEE_RESPONSE)
+                    .receiverId(attendeeResponseNotification.getReceiverId())
+                    .occurredAt(zonedOccurredAt)
+                    .isRead(attendeeResponseNotification.getIsRead())
+                    .scheduleId(scheduleInfo.getScheduleId())
+                    .scheduleName(scheduleInfo.getName())
+                    .attendeeId(attendeeResponseNotification.getAttendeeId())
+                    .attendeeName(attendeeInfo.getName())
+                    .response(attendeeResponseNotification.getResponse())
+                    .build();
+            });
     }
 
     private Mono<NotificationSseEvent> convertToMeetingDeleteSseEvent(
         MeetingDeleteNotification meetingDeleteNotification) {
-        return null;
+        return Mono.zip(
+                memberTimezoneService.getZoneIdOfMember(meetingDeleteNotification.getReceiverId())
+                    .subscribeOn(Schedulers.boundedElastic()),
+                userServiceClient.getUserInfo(meetingDeleteNotification.getOrganizerId())
+                    .subscribeOn(Schedulers.boundedElastic())
+            )
+            .map(tuple -> {
+                ZoneId memberTimezone = tuple.getT1();
+                var organizerInfo = tuple.getT2();
+                LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(
+                    meetingDeleteNotification.getOccurredAt(), memberTimezone);
+                return MeetingDeleteSseEvent.builder()
+                    .id(meetingDeleteNotification.getId())
+                    .type(NotificationType.MEETING_DELETED)
+                    .receiverId(meetingDeleteNotification.getReceiverId())
+                    .occurredAt(zonedOccurredAt)
+                    .isRead(meetingDeleteNotification.getIsRead())
+                    .organizerId(meetingDeleteNotification.getOrganizerId())
+                    .organizerName(organizerInfo.getName())
+                    .scheduleId(null)
+                    .scheduleName(meetingDeleteNotification.getScheduleName())
+                    .build();
+            });
     }
 
     private Mono<NotificationSseEvent> convertToMeetingUpdateNotTimeSseEvent(
         MeetingUpdateNotTimeNotification meetingUpdateNotTimeNotification) {
-        return null;
+        return Mono.zip(
+                memberTimezoneService.getZoneIdOfMember(
+                        meetingUpdateNotTimeNotification.getReceiverId())
+                    .subscribeOn(Schedulers.boundedElastic()),
+                scheduleServiceClient.getSchedule(meetingUpdateNotTimeNotification.getScheduleId())
+                    .subscribeOn(Schedulers.boundedElastic()))
+            .map(tuple -> {
+                    ZoneId memberTimezone = tuple.getT1();
+                    var scheduleInfo = tuple.getT2();
+                    LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(
+                        meetingUpdateNotTimeNotification.getOccurredAt(), memberTimezone);
+                    LocalDateTime zonedStartTime = TimeZoneConvertUtils.convertToZone(
+                        scheduleInfo.getStartDatetime(), memberTimezone);
+                    LocalDateTime zonedEndTime = TimeZoneConvertUtils.convertToZone(
+                        scheduleInfo.getEndDatetime(), memberTimezone);
+                    return MeetingUpdateNotTimeSseEvent.builder()
+                        .id(meetingUpdateNotTimeNotification.getId())
+                        .type(NotificationType.MEETING_UPDATED_FIELDS)
+                        .receiverId(meetingUpdateNotTimeNotification.getReceiverId())
+                        .occurredAt(zonedOccurredAt)
+                        .isRead(meetingUpdateNotTimeNotification.getIsRead())
+                        .organizerId(scheduleInfo.getOrganizerId())
+                        .organizerName(scheduleInfo.getOrganizerName())
+                        .scheduleId(scheduleInfo.getScheduleId())
+                        .scheduleName(scheduleInfo.getName())
+                        .startTime(zonedStartTime)
+                        .endTime(zonedEndTime)
+                        .updatedFields(meetingUpdateNotTimeNotification.getUpdatedFields())
+                        .build();
+                }
+            );
     }
 
     private Mono<NotificationSseEvent> convertToMeetingUpdateTimeSseEvent(
         MeetingUpdateTimeNotification meetingUpdateTimeNotification) {
-        return null;
+        return Mono.zip(
+                memberTimezoneService.getZoneIdOfMember(meetingUpdateTimeNotification.getReceiverId())
+                    .subscribeOn(Schedulers.boundedElastic()),
+                scheduleServiceClient.getSchedule(meetingUpdateTimeNotification.getScheduleId())
+                    .subscribeOn(Schedulers.boundedElastic()))
+            .map(tuple -> {
+                    ZoneId memberTimezone = tuple.getT1();
+                    var scheduleInfo = tuple.getT2();
+                    LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(
+                        meetingUpdateTimeNotification.getOccurredAt(), memberTimezone);
+                    LocalDateTime zonedPreviousStartTime = TimeZoneConvertUtils.convertToZone(
+                        meetingUpdateTimeNotification.getPreviousStartTime(), memberTimezone);
+                    LocalDateTime zonedPreviousEndTime = TimeZoneConvertUtils.convertToZone(
+                        meetingUpdateTimeNotification.getPreviousEndTime(), memberTimezone);
+                    LocalDateTime zonedUpdatedStartTime = TimeZoneConvertUtils.convertToZone(
+                        meetingUpdateTimeNotification.getUpdatedStartTime(), memberTimezone);
+                    LocalDateTime zonedUpdatedEndTime = TimeZoneConvertUtils.convertToZone(
+                        meetingUpdateTimeNotification.getUpdatedEndTime(), memberTimezone);
+                    return MeetingUpdateTimeSseEvent.builder()
+                        .id(meetingUpdateTimeNotification.getId())
+                        .type(NotificationType.MEETING_UPDATED_TIME)
+                        .receiverId(meetingUpdateTimeNotification.getReceiverId())
+                        .occurredAt(zonedOccurredAt)
+                        .isRead(meetingUpdateTimeNotification.getIsRead())
+                        .organizerId(scheduleInfo.getOrganizerId())
+                        .organizerName(scheduleInfo.getOrganizerName())
+                        .scheduleId(scheduleInfo.getScheduleId())
+                        .scheduleName(scheduleInfo.getName())
+                        .previousStartTime(zonedPreviousStartTime)
+                        .previousEndTime(zonedPreviousEndTime)
+                        .updatedStartTime(zonedUpdatedStartTime)
+                        .updatedEndTime(zonedUpdatedEndTime)
+                        .build();
+                }
+            );
     }
 
-    private Mono<NotificationSseEvent> convertToMeetingCreateSseEvent(MeetingCreateNotification meetingCreateNotification) {
-
-        return memberTimezoneService.getZoneIdOfMember(meetingCreateNotification.getReceiverId())
-            .map(memberTimezone -> {
+    private Mono<NotificationSseEvent> convertToMeetingCreateSseEvent(
+        MeetingCreateNotification meetingCreateNotification) {
+        return Mono.zip(
+                memberTimezoneService.getZoneIdOfMember(meetingCreateNotification.getReceiverId())
+                    .subscribeOn(Schedulers.boundedElastic()),
+                scheduleServiceClient.getSchedule(meetingCreateNotification.getScheduleId())
+                    .subscribeOn(Schedulers.boundedElastic()))
+            .map(tuple -> {
+                ZoneId memberTimezone = tuple.getT1();
+                var scheduleInfo = tuple.getT2();
                 LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(
                     meetingCreateNotification.getOccurredAt(), memberTimezone);
-                MeetingCreateSseEvent build = MeetingCreateSseEvent.builder()
+                LocalDateTime zonedStartTime = TimeZoneConvertUtils.convertToZone(
+                    scheduleInfo.getStartDatetime(), memberTimezone);
+                LocalDateTime zonedEndTime = TimeZoneConvertUtils.convertToZone(
+                    scheduleInfo.getEndDatetime(), memberTimezone);
+                return MeetingCreateSseEvent.builder()
                     .id(meetingCreateNotification.getId())
+                    .type(NotificationType.MEETING_CREATED)
                     .receiverId(meetingCreateNotification.getReceiverId())
                     .occurredAt(zonedOccurredAt)
                     .isRead(meetingCreateNotification.getIsRead())
+                    .organizerId(scheduleInfo.getOrganizerId())
+                    .organizerName(scheduleInfo.getOrganizerName())
+                    .scheduleId(scheduleInfo.getScheduleId())
+                    .scheduleName(scheduleInfo.getName())
+                    .startTime(zonedStartTime)
+                    .endTime(zonedEndTime)
                     .build();
-                return build;
             });
     }
 

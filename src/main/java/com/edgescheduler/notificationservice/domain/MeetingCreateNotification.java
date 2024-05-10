@@ -14,9 +14,9 @@ public class MeetingCreateNotification extends Notification {
     private Long scheduleId;
 
     // temporary
-    private String scheduleName;
-    private Integer organizerId;
-    private String organizerName;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+//    private String scheduleName;
+//    private Integer organizerId;
+//    private String organizerName;
+//    private LocalDateTime startTime;
+//    private LocalDateTime endTime;
 }
