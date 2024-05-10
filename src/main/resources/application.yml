@@ -1,3 +1,61 @@
 spring:
   application:
     name: notification-service
+  cloud:
+    discovery:
+      enabled: false
+  kafka:
+    bootstrap-servers:
+      - ${KAFKA_BOOTSTRAP_SERVER_1}
+      - ${KAFKA_BOOTSTRAP_SERVER_2}
+      - ${KAFKA_BOOTSTRAP_SERVER_3}
+    consumer:
+      group-id: ${KAFKA_GROUP_ID}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  data:
+    mongodb:
+      host: ${MONGO_HOST}
+      port: ${MONGO_PORT}
+      username: ${MONGO_INITDB_ROOT_USERNAME}
+      password: ${MONGO_INITDB_ROOT_PASSWORD}
+      database: edgescheduler
+      authentication-database: admin
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          timeout: 5000
+          starttls:
+            enable: true
+  config:
+    import:
+      - optional:env.yml
+server:
+  port: 8081
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  cloud:
+    discovery:
+      enabled: true
+server:
+  port: 8201
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:localhost}
+  instance:
+    hostname: ${SERVER_HOST:localhost}

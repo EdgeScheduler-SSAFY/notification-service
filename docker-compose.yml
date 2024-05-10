@@ -1,0 +1,14 @@
+services:
+  notification-app:
+    container_name: notification-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8201:8201
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    external: true
