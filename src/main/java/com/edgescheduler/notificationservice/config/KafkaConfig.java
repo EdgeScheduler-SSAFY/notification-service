@@ -1,6 +1,7 @@
 package com.edgescheduler.notificationservice.config;
 
 import com.edgescheduler.notificationservice.config.deserializer.KafkaMessageJsonDeserializer;
+import com.edgescheduler.notificationservice.message.ChangeTimeZoneMessage;
 import com.edgescheduler.notificationservice.message.KafkaEventMessage;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.KafkaAdmin.NewTopics;
 import org.springframework.kafka.core.reactive.ReactiveKafkaConsumerTemplate;
 import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
 import reactor.kafka.receiver.ReceiverOptions;
 import reactor.kafka.sender.SenderOptions;
 
@@ -33,6 +35,8 @@ public class KafkaConfig {
     private String attendeeResponseTopic;
     @Value("${kafka.topic.attendee-proposal}")
     private String attendeeProposalTopic;
+    @Value("${kafka.topic.timezone-configured}")
+    private String timeZoneConfiguredTopic;
 
     @Bean
     public NewTopics notification() {
@@ -41,9 +45,9 @@ public class KafkaConfig {
             TopicBuilder.name(meetingDeletedTopic).partitions(3).replicas(2).build(),
             TopicBuilder.name(meetingUpdatedTopic).partitions(3).replicas(2).build(),
             TopicBuilder.name(attendeeResponseTopic).partitions(3).replicas(2).build(),
-            TopicBuilder.name(attendeeProposalTopic).partitions(3).replicas(2).build()
+            TopicBuilder.name(attendeeProposalTopic).partitions(3).replicas(2).build(),
+            TopicBuilder.name(timeZoneConfiguredTopic).partitions(3).replicas(2).build()
         );
-
     }
 
     @Bean
@@ -57,7 +61,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ReactiveKafkaConsumerTemplate<String, KafkaEventMessage> consumerTemplate(
+    public ReactiveKafkaConsumerTemplate<String, KafkaEventMessage> notificationConsumerTemplate(
         KafkaProperties properties
     ) {
         Map<String, Object> consumerProperties = properties.buildConsumerProperties(null);
@@ -68,6 +72,19 @@ public class KafkaConfig {
         receiverOptions = receiverOptions.subscription(
             List.of(meetingCreatedTopic, meetingDeletedTopic, meetingUpdatedTopic,
                 attendeeResponseTopic, attendeeProposalTopic));
+        return new ReactiveKafkaConsumerTemplate<>(receiverOptions);
+    }
+
+    @Bean
+    public ReactiveKafkaConsumerTemplate<String, ChangeTimeZoneMessage> timeZoneConsumerTemplate(
+        KafkaProperties properties
+    ) {
+        Map<String, Object> consumerProperties = properties.buildConsumerProperties(null);
+        consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+            JsonDeserializer.class);
+        ReceiverOptions<String, ChangeTimeZoneMessage> receiverOptions = ReceiverOptions.create(
+            consumerProperties);
+        receiverOptions = receiverOptions.subscription(List.of(timeZoneConfiguredTopic));
         return new ReactiveKafkaConsumerTemplate<>(receiverOptions);
     }
 }
