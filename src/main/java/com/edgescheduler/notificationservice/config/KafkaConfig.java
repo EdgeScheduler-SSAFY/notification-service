@@ -102,7 +102,7 @@ public class KafkaConfig {
             MemberEmailMessageDeserializer.class);
         ReceiverOptions<String, MemberEmailMessage> receiverOptions = ReceiverOptions.create(
             consumerProperties);
-        receiverOptions = receiverOptions.subscription(List.of(meetingCreatedTopic));
+        receiverOptions = receiverOptions.subscription(List.of(memberCreatedTopic));
         return new ReactiveKafkaConsumerTemplate<>(receiverOptions);
     }
 }
