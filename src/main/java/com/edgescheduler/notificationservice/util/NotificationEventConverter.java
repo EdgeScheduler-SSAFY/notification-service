@@ -61,7 +61,9 @@ public class NotificationEventConverter {
         return Mono.zip(
                 memberInfoService.getZoneIdOfMember(attendeeProposalNotification.getReceiverId())
                     .subscribeOn(Schedulers.boundedElastic()),
-                scheduleServiceClient.getSchedule(attendeeProposalNotification.getScheduleId())
+                scheduleServiceClient.getSchedule(
+                    attendeeProposalNotification.getScheduleId(),
+                    attendeeProposalNotification.getReceiverId())
                     .subscribeOn(Schedulers.boundedElastic()),
                 userServiceClient.getUserInfo(attendeeProposalNotification.getAttendeeId())
                     .subscribeOn(Schedulers.boundedElastic()))
@@ -96,7 +98,9 @@ public class NotificationEventConverter {
         return Mono.zip(
                 memberInfoService.getZoneIdOfMember(attendeeResponseNotification.getReceiverId())
                     .subscribeOn(Schedulers.boundedElastic()),
-                scheduleServiceClient.getSchedule(attendeeResponseNotification.getScheduleId())
+                scheduleServiceClient.getSchedule(
+                        attendeeResponseNotification.getScheduleId(),
+                        attendeeResponseNotification.getReceiverId())
                     .subscribeOn(Schedulers.boundedElastic()),
                 userServiceClient.getUserInfo(attendeeResponseNotification.getAttendeeId())
                     .subscribeOn(Schedulers.boundedElastic()))
@@ -154,7 +158,9 @@ public class NotificationEventConverter {
                 memberInfoService.getZoneIdOfMember(
                         meetingUpdateNotTimeNotification.getReceiverId())
                     .subscribeOn(Schedulers.boundedElastic()),
-                scheduleServiceClient.getSchedule(meetingUpdateNotTimeNotification.getScheduleId())
+                scheduleServiceClient.getSchedule(
+                        meetingUpdateNotTimeNotification.getScheduleId(),
+                        meetingUpdateNotTimeNotification.getReceiverId())
                     .subscribeOn(Schedulers.boundedElastic()))
             .map(tuple -> {
                     ZoneId memberTimezone = tuple.getT1();
@@ -188,7 +194,9 @@ public class NotificationEventConverter {
         return Mono.zip(
                 memberInfoService.getZoneIdOfMember(meetingUpdateTimeNotification.getReceiverId())
                     .subscribeOn(Schedulers.boundedElastic()),
-                scheduleServiceClient.getSchedule(meetingUpdateTimeNotification.getScheduleId())
+                scheduleServiceClient.getSchedule(
+                        meetingUpdateTimeNotification.getScheduleId(),
+                        meetingUpdateTimeNotification.getReceiverId())
                     .subscribeOn(Schedulers.boundedElastic()))
             .map(tuple -> {
                     ZoneId memberTimezone = tuple.getT1();
@@ -227,7 +235,9 @@ public class NotificationEventConverter {
         return Mono.zip(
                 memberInfoService.getZoneIdOfMember(meetingCreateNotification.getReceiverId())
                     .subscribeOn(Schedulers.boundedElastic()),
-                scheduleServiceClient.getSchedule(meetingCreateNotification.getScheduleId())
+                scheduleServiceClient.getSchedule(
+                        meetingCreateNotification.getScheduleId(),
+                        meetingCreateNotification.getReceiverId())
                     .subscribeOn(Schedulers.boundedElastic()))
             .map(tuple -> {
                 ZoneId memberTimezone = tuple.getT1();

@@ -1,5 +1,6 @@
 package com.edgescheduler.notificationservice.client;
 
+import com.edgescheduler.notificationservice.event.AttendeeStatus;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,9 +17,11 @@ public class ScheduleServiceClient {
         this.webClient = webClientBuilder.baseUrl("http://schedule-service").build();
     }
 
-    public Mono<ScheduleInfo> getSchedule(Long id) {
+    public Mono<ScheduleInfo> getSchedule(Long scheduleId, Integer receiverId) {
         return webClient.get()
-            .uri("/schedules/{id}/simple", id)
+            .uri(uriBuilder -> uriBuilder.path("/schedules/{scheduleId}/simple")
+                .queryParam("receiverId", receiverId)
+                .build(scheduleId))
             .retrieve().bodyToMono(ScheduleInfo.class);
     }
 
@@ -31,5 +34,6 @@ public class ScheduleServiceClient {
         private String organizerName;
         private LocalDateTime startDatetime;
         private LocalDateTime endDatetime;
+        private AttendeeStatus receiverStatus;
     }
 }

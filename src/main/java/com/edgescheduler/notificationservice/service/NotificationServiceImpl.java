@@ -10,6 +10,7 @@ import com.edgescheduler.notificationservice.domain.Notification;
 import com.edgescheduler.notificationservice.dto.NotificationPage;
 import com.edgescheduler.notificationservice.event.AttendeeProposalSseEvent;
 import com.edgescheduler.notificationservice.event.AttendeeResponseSseEvent;
+import com.edgescheduler.notificationservice.event.AttendeeStatus;
 import com.edgescheduler.notificationservice.event.MeetingCreateSseEvent;
 import com.edgescheduler.notificationservice.event.MeetingDeleteSseEvent;
 import com.edgescheduler.notificationservice.event.MeetingUpdateNotTimeSseEvent;
@@ -98,6 +99,7 @@ public class NotificationServiceImpl implements NotificationService {
                     .organizerName(meetingCreateMessage.getOrganizerName())
                     .startTime(meetingCreateMessage.getStartTime())
                     .endTime(meetingCreateMessage.getEndTime())
+                    .receiverStatus(AttendeeStatus.PENDING)
                     .isRead(notification.getIsRead())
                     .build();
             });
@@ -134,6 +136,7 @@ public class NotificationServiceImpl implements NotificationService {
                         .organizerName(meetingUpdateMessage.getOrganizerName())
                         .startTime(meetingUpdateMessage.getUpdatedStartTime())
                         .endTime(meetingUpdateMessage.getUpdatedEndTime())
+                        .receiverStatus(AttendeeStatus.PENDING)
                         .isRead(notification.getIsRead())
                         .build());
 
@@ -216,6 +219,7 @@ public class NotificationServiceImpl implements NotificationService {
                                 .previousEndTime(notification.getPreviousEndTime())
                                 .updatedStartTime(notification.getUpdatedStartTime())
                                 .updatedEndTime(notification.getUpdatedEndTime())
+                                .receiverStatus(AttendeeStatus.PENDING)
                                 .build())
                     );
                 }

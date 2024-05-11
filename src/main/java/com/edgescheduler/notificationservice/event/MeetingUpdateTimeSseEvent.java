@@ -16,4 +16,5 @@ public class MeetingUpdateTimeSseEvent extends NotificationSseEvent {
     private LocalDateTime previousEndTime;
     private LocalDateTime updatedStartTime;
     private LocalDateTime updatedEndTime;
+    private AttendeeStatus receiverStatus;
 }
