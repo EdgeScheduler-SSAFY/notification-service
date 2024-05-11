@@ -19,7 +19,7 @@ import com.edgescheduler.notificationservice.event.NotificationType;
 import com.edgescheduler.notificationservice.event.UpdatedField;
 import com.edgescheduler.notificationservice.message.AttendeeProposalMessage;
 import com.edgescheduler.notificationservice.message.AttendeeResponseMessage;
-import com.edgescheduler.notificationservice.message.KafkaEventMessage;
+import com.edgescheduler.notificationservice.message.NotificationMessage;
 import com.edgescheduler.notificationservice.message.MeetingCreateMessage;
 import com.edgescheduler.notificationservice.message.MeetingDeleteMessage;
 import com.edgescheduler.notificationservice.message.MeetingUpdateMessage;
@@ -47,7 +47,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public Publisher<NotificationSseEvent> saveNotificationFromEventMessage(
-        KafkaEventMessage eventMessage) {
+        NotificationMessage eventMessage) {
 
         log.info("Received event message: {}", eventMessage.getOccurredAt());
         if (eventMessage instanceof MeetingCreateMessage meetingCreateMessage) {

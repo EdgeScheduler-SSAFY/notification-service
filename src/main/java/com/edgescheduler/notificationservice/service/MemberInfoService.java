@@ -1,7 +1,7 @@
 package com.edgescheduler.notificationservice.service;
 
-import com.edgescheduler.notificationservice.domain.MemberTimezone;
-import com.edgescheduler.notificationservice.repository.MemberTimezoneRepository;
+import com.edgescheduler.notificationservice.domain.MemberInfo;
+import com.edgescheduler.notificationservice.repository.MemberInfoRepository;
 import java.time.ZoneId;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,24 +11,27 @@ import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
-public class MemberTimezoneService {
+public class MemberInfoService {
 
     private final Map<Integer, ZoneId> memberTimezoneMap = new ConcurrentHashMap<>();
-    private final MemberTimezoneRepository memberTimezoneRepository;
+    private final MemberInfoRepository memberInfoRepository;
 
     public Mono<ZoneId> getZoneIdOfMember(Integer memberId) {
         return Mono.justOrEmpty(memberTimezoneMap.get(memberId))
-            .switchIfEmpty(memberTimezoneRepository.findById(memberId)
-                .map(memberTimezone -> {
-                    ZoneId zoneId = ZoneId.of(memberTimezone.getZoneId());
+            .switchIfEmpty(memberInfoRepository.findById(memberId)
+                .map(memberInfo -> {
+                    ZoneId zoneId = ZoneId.of(memberInfo.getZoneId());
                     memberTimezoneMap.put(memberId, zoneId);
                     return zoneId;
                 }));
     }
 
     public Mono<Void> upsertMemberTimezone(Integer memberId, String timezone) {
-        return memberTimezoneRepository.save(new MemberTimezone(memberId, timezone))
-            .doOnSuccess(memberTimezone -> memberTimezoneMap.put(memberId, ZoneId.of(timezone)))
+        return memberInfoRepository.save(MemberInfo.builder()
+                .memberId(memberId)
+                .zoneId(timezone)
+                .build())
+            .doOnSuccess(memberInfo -> memberTimezoneMap.put(memberId, ZoneId.of(timezone)))
             .then();
     }
 }

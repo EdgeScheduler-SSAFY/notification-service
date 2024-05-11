@@ -2,7 +2,7 @@ package com.edgescheduler.notificationservice.service;
 
 import com.edgescheduler.notificationservice.dto.NotificationPage;
 import com.edgescheduler.notificationservice.event.NotificationSseEvent;
-import com.edgescheduler.notificationservice.message.KafkaEventMessage;
+import com.edgescheduler.notificationservice.message.NotificationMessage;
 import java.util.List;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -10,7 +10,8 @@ import reactor.core.publisher.Mono;
 
 public interface NotificationService {
 
-    Publisher<NotificationSseEvent> saveNotificationFromEventMessage(KafkaEventMessage eventMessage);
+    Publisher<NotificationSseEvent> saveNotificationFromEventMessage(
+        NotificationMessage eventMessage);
 
     Flux<NotificationSseEvent> getNotificationsByReceiverIdWithin2Weeks(Integer receiverId);
 

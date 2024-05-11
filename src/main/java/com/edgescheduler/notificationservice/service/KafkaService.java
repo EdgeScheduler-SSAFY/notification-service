@@ -1,9 +1,10 @@
 package com.edgescheduler.notificationservice.service;
 
-import com.edgescheduler.notificationservice.domain.MemberTimezone;
+import com.edgescheduler.notificationservice.domain.MemberInfo;
 import com.edgescheduler.notificationservice.message.ChangeTimeZoneMessage;
-import com.edgescheduler.notificationservice.message.KafkaEventMessage;
-import com.edgescheduler.notificationservice.repository.MemberTimezoneRepository;
+import com.edgescheduler.notificationservice.message.MemberEmailMessage;
+import com.edgescheduler.notificationservice.message.NotificationMessage;
+import com.edgescheduler.notificationservice.repository.MemberInfoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -19,9 +20,10 @@ import reactor.core.scheduler.Schedulers;
 public class KafkaService implements ApplicationRunner {
 
     private final EventSinkManager eventSinkManager;
-    private final ReactiveKafkaConsumerTemplate<String, KafkaEventMessage> notificationQueue;
+    private final ReactiveKafkaConsumerTemplate<String, NotificationMessage> notificationQueue;
     private final ReactiveKafkaConsumerTemplate<String, ChangeTimeZoneMessage> timeZoneQueue;
-    private final MemberTimezoneRepository memberTimezoneRepository;
+    private final ReactiveKafkaConsumerTemplate<String, MemberEmailMessage> emailQueue;
+    private final MemberInfoRepository memberInfoRepository;
     private final NotificationService notificationService;
     private final EmailService emailService;
 
@@ -55,16 +57,38 @@ public class KafkaService implements ApplicationRunner {
                 log.info("Timezone message received");
                 ChangeTimeZoneMessage message = record.value();
                 log.info("memberId: {} | zoneId: {}", message.getMemberId(), message.getZoneId());
-                return memberTimezoneRepository.findById(message.getMemberId())
-                    .flatMap(memberTimezone -> {
-                        memberTimezone.changeZoneId(message.getZoneId());
-                        return memberTimezoneRepository.save(memberTimezone);
-                    }).switchIfEmpty(Mono.defer(() -> memberTimezoneRepository.save(
-                        new MemberTimezone(message.getMemberId(), message.getZoneId()))
+                return memberInfoRepository.findById(message.getMemberId())
+                    .flatMap(memberInfo -> {
+                        memberInfo.changeZoneId(message.getZoneId());
+                        return memberInfoRepository.save(memberInfo);
+                    }).switchIfEmpty(Mono.defer(() -> memberInfoRepository.save(
+                        MemberInfo.builder()
+                            .memberId(message.getMemberId())
+                            .zoneId(message.getZoneId()).build())
                     ));
             })
             .doOnError(
                 error -> log.error("Error consuming timezone message: {}", error.getMessage()))
+            .subscribe();
+
+        this.emailQueue
+            .receiveAutoAck()
+            .flatMap(record -> {
+                log.info("Email message received");
+                MemberEmailMessage message = record.value();
+                log.info("id: {} | email: {}", message.getId(), message.getEmail());
+                return memberInfoRepository.findById(message.getId())
+                    .flatMap(memberInfo -> {
+                        memberInfo.changeEmail(message.getEmail());
+                        return memberInfoRepository.save(memberInfo);
+                    }).switchIfEmpty(Mono.defer(() -> memberInfoRepository.save(
+                        MemberInfo.builder()
+                            .memberId(message.getId())
+                            .email(message.getEmail()).build())
+                    ));
+            })
+            .doOnError(
+                error -> log.error("Error consuming email message: {}", error.getMessage()))
             .subscribe();
     }
 }

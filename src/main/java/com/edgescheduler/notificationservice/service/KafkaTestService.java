@@ -5,7 +5,7 @@ import com.edgescheduler.notificationservice.event.Response;
 import com.edgescheduler.notificationservice.event.UpdatedField;
 import com.edgescheduler.notificationservice.message.AttendeeProposalMessage;
 import com.edgescheduler.notificationservice.message.AttendeeResponseMessage;
-import com.edgescheduler.notificationservice.message.KafkaEventMessage;
+import com.edgescheduler.notificationservice.message.NotificationMessage;
 import com.edgescheduler.notificationservice.message.MeetingCreateMessage;
 import com.edgescheduler.notificationservice.message.MeetingDeleteMessage;
 import com.edgescheduler.notificationservice.message.MeetingUpdateMessage;
@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class KafkaTestService {
 
-    private final ReactiveKafkaProducerTemplate<String, KafkaEventMessage> producerTemplate;
+    private final ReactiveKafkaProducerTemplate<String, NotificationMessage> producerTemplate;
 
     public Mono<String> publishMeetingCreateEvent() {
         MeetingCreateMessage meetingCreateMessage = MeetingCreateMessage.builder()

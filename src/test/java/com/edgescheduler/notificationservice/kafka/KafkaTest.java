@@ -6,7 +6,7 @@ import com.edgescheduler.notificationservice.config.deserializer.NotificationMes
 import com.edgescheduler.notificationservice.event.Response;
 import com.edgescheduler.notificationservice.event.UpdatedField;
 import com.edgescheduler.notificationservice.message.AttendeeResponseMessage;
-import com.edgescheduler.notificationservice.message.KafkaEventMessage;
+import com.edgescheduler.notificationservice.message.NotificationMessage;
 import com.edgescheduler.notificationservice.message.MeetingCreateMessage;
 import com.edgescheduler.notificationservice.message.MeetingUpdateMessage;
 import java.time.Duration;
@@ -50,8 +50,8 @@ public class KafkaTest {
 
     private static final Duration DEFAULT_VERIFY_TIMEOUT = Duration.ofSeconds(10);
 
-    private static ReactiveKafkaConsumerTemplate<String, KafkaEventMessage> consumerTemplate;
-    private ReactiveKafkaProducerTemplate<String, KafkaEventMessage> producerTemplate;
+    private static ReactiveKafkaConsumerTemplate<String, NotificationMessage> consumerTemplate;
+    private ReactiveKafkaProducerTemplate<String, NotificationMessage> producerTemplate;
 
     @BeforeEach
     void setUpProducer() {
@@ -69,15 +69,15 @@ public class KafkaTest {
         consumerTemplate = new ReactiveKafkaConsumerTemplate<>(receiverOptions(props));
     }
 
-    private SenderOptions<String, KafkaEventMessage> senderOptions(Map<String, Object> props) {
+    private SenderOptions<String, NotificationMessage> senderOptions(Map<String, Object> props) {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         return SenderOptions.create(props);
     }
 
-    private static ReceiverOptions<String, KafkaEventMessage> receiverOptions(
+    private static ReceiverOptions<String, NotificationMessage> receiverOptions(
         Map<String, Object> props) {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, NotificationMessageJsonDeserializer.class);
-        ReceiverOptions<String, KafkaEventMessage> options = ReceiverOptions.create(props);
+        ReceiverOptions<String, NotificationMessage> options = ReceiverOptions.create(props);
         return options.consumerProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
             .subscription(
                 List.of(

@@ -17,7 +17,7 @@ import com.edgescheduler.notificationservice.event.MeetingUpdateTimeSseEvent;
 import com.edgescheduler.notificationservice.event.NotificationSseEvent;
 import com.edgescheduler.notificationservice.client.UserServiceClient;
 import com.edgescheduler.notificationservice.event.NotificationType;
-import com.edgescheduler.notificationservice.service.MemberTimezoneService;
+import com.edgescheduler.notificationservice.service.MemberInfoService;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ public class NotificationEventConverter {
 
     private final UserServiceClient userServiceClient;
     private final ScheduleServiceClient scheduleServiceClient;
-    private final MemberTimezoneService memberTimezoneService;
+    private final MemberInfoService memberInfoService;
 
     public Mono<NotificationSseEvent> convert(Notification notification) {
         if (notification instanceof MeetingCreateNotification meetingCreateNotification) {
@@ -59,7 +59,7 @@ public class NotificationEventConverter {
     private Mono<NotificationSseEvent> convertToAttendeeProposalSseEvent(
         AttendeeProposalNotification attendeeProposalNotification) {
         return Mono.zip(
-                memberTimezoneService.getZoneIdOfMember(attendeeProposalNotification.getReceiverId())
+                memberInfoService.getZoneIdOfMember(attendeeProposalNotification.getReceiverId())
                     .subscribeOn(Schedulers.boundedElastic()),
                 scheduleServiceClient.getSchedule(attendeeProposalNotification.getScheduleId())
                     .subscribeOn(Schedulers.boundedElastic()),
@@ -94,7 +94,7 @@ public class NotificationEventConverter {
     private Mono<NotificationSseEvent> convertToAttendeeResponseSseEvent(
         AttendeeResponseNotification attendeeResponseNotification) {
         return Mono.zip(
-                memberTimezoneService.getZoneIdOfMember(attendeeResponseNotification.getReceiverId())
+                memberInfoService.getZoneIdOfMember(attendeeResponseNotification.getReceiverId())
                     .subscribeOn(Schedulers.boundedElastic()),
                 scheduleServiceClient.getSchedule(attendeeResponseNotification.getScheduleId())
                     .subscribeOn(Schedulers.boundedElastic()),
@@ -124,7 +124,7 @@ public class NotificationEventConverter {
     private Mono<NotificationSseEvent> convertToMeetingDeleteSseEvent(
         MeetingDeleteNotification meetingDeleteNotification) {
         return Mono.zip(
-                memberTimezoneService.getZoneIdOfMember(meetingDeleteNotification.getReceiverId())
+                memberInfoService.getZoneIdOfMember(meetingDeleteNotification.getReceiverId())
                     .subscribeOn(Schedulers.boundedElastic()),
                 userServiceClient.getUserInfo(meetingDeleteNotification.getOrganizerId())
                     .subscribeOn(Schedulers.boundedElastic())
@@ -151,7 +151,7 @@ public class NotificationEventConverter {
     private Mono<NotificationSseEvent> convertToMeetingUpdateNotTimeSseEvent(
         MeetingUpdateNotTimeNotification meetingUpdateNotTimeNotification) {
         return Mono.zip(
-                memberTimezoneService.getZoneIdOfMember(
+                memberInfoService.getZoneIdOfMember(
                         meetingUpdateNotTimeNotification.getReceiverId())
                     .subscribeOn(Schedulers.boundedElastic()),
                 scheduleServiceClient.getSchedule(meetingUpdateNotTimeNotification.getScheduleId())
@@ -186,7 +186,7 @@ public class NotificationEventConverter {
     private Mono<NotificationSseEvent> convertToMeetingUpdateTimeSseEvent(
         MeetingUpdateTimeNotification meetingUpdateTimeNotification) {
         return Mono.zip(
-                memberTimezoneService.getZoneIdOfMember(meetingUpdateTimeNotification.getReceiverId())
+                memberInfoService.getZoneIdOfMember(meetingUpdateTimeNotification.getReceiverId())
                     .subscribeOn(Schedulers.boundedElastic()),
                 scheduleServiceClient.getSchedule(meetingUpdateTimeNotification.getScheduleId())
                     .subscribeOn(Schedulers.boundedElastic()))
@@ -225,7 +225,7 @@ public class NotificationEventConverter {
     private Mono<NotificationSseEvent> convertToMeetingCreateSseEvent(
         MeetingCreateNotification meetingCreateNotification) {
         return Mono.zip(
-                memberTimezoneService.getZoneIdOfMember(meetingCreateNotification.getReceiverId())
+                memberInfoService.getZoneIdOfMember(meetingCreateNotification.getReceiverId())
                     .subscribeOn(Schedulers.boundedElastic()),
                 scheduleServiceClient.getSchedule(meetingCreateNotification.getScheduleId())
                     .subscribeOn(Schedulers.boundedElastic()))

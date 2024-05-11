@@ -1,9 +1,11 @@
 package com.edgescheduler.notificationservice.config;
 
 import com.edgescheduler.notificationservice.config.deserializer.ChangeTimeZoneMessageDeserializer;
+import com.edgescheduler.notificationservice.config.deserializer.MemberEmailMessageDeserializer;
 import com.edgescheduler.notificationservice.config.deserializer.NotificationMessageJsonDeserializer;
 import com.edgescheduler.notificationservice.message.ChangeTimeZoneMessage;
-import com.edgescheduler.notificationservice.message.KafkaEventMessage;
+import com.edgescheduler.notificationservice.message.MemberEmailMessage;
+import com.edgescheduler.notificationservice.message.NotificationMessage;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +39,8 @@ public class KafkaConfig {
     private String attendeeProposalTopic;
     @Value("${kafka.topic.timezone-configured}")
     private String timeZoneConfiguredTopic;
+    @Value("${kafka.topic.member-created}")
+    private String memberCreatedTopic;
 
     @Bean
     public NewTopics notification() {
@@ -46,28 +50,29 @@ public class KafkaConfig {
             TopicBuilder.name(meetingUpdatedTopic).partitions(3).replicas(2).build(),
             TopicBuilder.name(attendeeResponseTopic).partitions(3).replicas(2).build(),
             TopicBuilder.name(attendeeProposalTopic).partitions(3).replicas(2).build(),
-            TopicBuilder.name(timeZoneConfiguredTopic).partitions(3).replicas(2).build()
+            TopicBuilder.name(timeZoneConfiguredTopic).partitions(3).replicas(2).build(),
+            TopicBuilder.name(memberCreatedTopic).partitions(3).replicas(2).build()
         );
     }
 
     @Bean
-    public ReactiveKafkaProducerTemplate<String, KafkaEventMessage> producerTemplate(
+    public ReactiveKafkaProducerTemplate<String, NotificationMessage> producerTemplate(
         KafkaProperties properties
     ) {
         Map<String, Object> producerProperties = properties.buildProducerProperties(null);
-        SenderOptions<String, KafkaEventMessage> senderOptions = SenderOptions.create(
+        SenderOptions<String, NotificationMessage> senderOptions = SenderOptions.create(
             producerProperties);
         return new ReactiveKafkaProducerTemplate<>(senderOptions);
     }
 
     @Bean
-    public ReactiveKafkaConsumerTemplate<String, KafkaEventMessage> notificationConsumerTemplate(
+    public ReactiveKafkaConsumerTemplate<String, NotificationMessage> notificationConsumerTemplate(
         KafkaProperties properties
     ) {
         Map<String, Object> consumerProperties = properties.buildConsumerProperties(null);
         consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
             NotificationMessageJsonDeserializer.class);
-        ReceiverOptions<String, KafkaEventMessage> receiverOptions = ReceiverOptions.create(
+        ReceiverOptions<String, NotificationMessage> receiverOptions = ReceiverOptions.create(
             consumerProperties);
         receiverOptions = receiverOptions.subscription(
             List.of(meetingCreatedTopic, meetingDeletedTopic, meetingUpdatedTopic,
@@ -85,6 +90,19 @@ public class KafkaConfig {
         ReceiverOptions<String, ChangeTimeZoneMessage> receiverOptions = ReceiverOptions.create(
             consumerProperties);
         receiverOptions = receiverOptions.subscription(List.of(timeZoneConfiguredTopic));
+        return new ReactiveKafkaConsumerTemplate<>(receiverOptions);
+    }
+
+    @Bean
+    public ReactiveKafkaConsumerTemplate<String, MemberEmailMessage> emailConsumerTemplate(
+        KafkaProperties properties
+    ) {
+        Map<String, Object> consumerProperties = properties.buildConsumerProperties(null);
+        consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+            MemberEmailMessageDeserializer.class);
+        ReceiverOptions<String, MemberEmailMessage> receiverOptions = ReceiverOptions.create(
+            consumerProperties);
+        receiverOptions = receiverOptions.subscription(List.of(meetingCreatedTopic));
         return new ReactiveKafkaConsumerTemplate<>(receiverOptions);
     }
 }
