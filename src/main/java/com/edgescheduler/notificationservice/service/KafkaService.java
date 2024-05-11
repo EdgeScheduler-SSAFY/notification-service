@@ -40,12 +40,17 @@ public class KafkaService implements ApplicationRunner {
             })
             .flatMap(event -> {
                 log.info("Sending event to receiver: {}", event.getReceiverId());
-//                return Mono.zip(
-//                    eventSinkManager.sendEvent(event.getReceiverId(), event.getType().toString(), event).subscribeOn(Schedulers.boundedElastic()),
-//                    emailService.sendEmail("oh052679@naver.com", event.getReceiverId() + "번 유저에게.", event.getType().toString()).subscribeOn(Schedulers.boundedElastic())
-//                );
-                return eventSinkManager.sendEvent(event.getReceiverId(), event.getType().toString(),
-                    event).subscribeOn(Schedulers.boundedElastic());
+                return Mono.zip(
+                    eventSinkManager.sendEvent(event.getReceiverId(), event.getType().toString(), event).subscribeOn(Schedulers.boundedElastic()),
+                    memberInfoRepository.findById(event.getReceiverId())
+                            .flatMap(memberInfo -> {
+                                if (memberInfo.getEmail() == null) {
+                                    return Mono.empty();
+                                }
+                                return emailService.sendEmail(memberInfo.getEmail(), event.getReceiverId() + "번 유저에게.", event.getType().toString()).subscribeOn(Schedulers.boundedElastic());
+                            }));
+//                return eventSinkManager.sendEvent(event.getReceiverId(), event.getType().toString(),
+//                    event).subscribeOn(Schedulers.boundedElastic());
             })
             .doOnError(
                 error -> log.error("Error consuming notification message: {}", error.getMessage()))
