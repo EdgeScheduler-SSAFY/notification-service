@@ -22,7 +22,19 @@ public class ScheduleServiceClient {
             .uri(uriBuilder -> uriBuilder.path("/schedules/{scheduleId}/simple")
                 .queryParam("receiverId", receiverId)
                 .build(scheduleId))
-            .retrieve().bodyToMono(ScheduleInfo.class);
+            .retrieve().bodyToMono(ScheduleInfo.class)
+            .onErrorResume(e -> Mono.just(      // for stubbing
+                ScheduleInfo.builder()
+                    .scheduleId(scheduleId)
+                    .name("Unknown")
+                    .organizerId(0)
+                    .organizerName("Unknown")
+                    .startDatetime(LocalDateTime.now())
+                    .endDatetime(LocalDateTime.now().plusHours(2))
+                    .runningTime(120)
+                    .receiverStatus(AttendeeStatus.PENDING)
+                    .build()
+            ));
     }
 
     @Getter

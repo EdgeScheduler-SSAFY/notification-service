@@ -9,6 +9,8 @@ import com.edgescheduler.notificationservice.service.NotificationService;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +30,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/notify")
 public class NotifyController {
 
+    private static final Logger log = LoggerFactory.getLogger(NotifyController.class);
     private final EventSinkManager eventSinkManager;
     private final NotificationService notificationService;
 
@@ -57,6 +60,7 @@ public class NotifyController {
         @RequestHeader(name = "Authorization") Integer userId,
         @RequestParam(name = "page", defaultValue = "0") Integer page,
         @RequestParam(name = "size", defaultValue = "5") Integer size) {
+        log.info("getNotificationsPage: userId={}, page={}, size={}", userId, page, size);
         return notificationService.getNotificationsByReceiverIdWithin2WeeksWithPaging(userId, page, size);
     }
 
