@@ -23,7 +23,8 @@ public class MemberInfoService {
                     ZoneId zoneId = ZoneId.of(memberInfo.getZoneId());
                     memberTimezoneMap.put(memberId, zoneId);
                     return zoneId;
-                }));
+                })
+                .switchIfEmpty(Mono.just(ZoneId.systemDefault())));
     }
 
     public Mono<Void> upsertMemberTimezone(Integer memberId, String timezone) {

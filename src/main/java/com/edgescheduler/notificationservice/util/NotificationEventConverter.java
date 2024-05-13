@@ -37,24 +37,31 @@ public class NotificationEventConverter {
 
     public Mono<NotificationSseEvent> convert(Notification notification) {
         if (notification instanceof MeetingCreateNotification meetingCreateNotification) {
+            log.info("convertToMeetingCreateSseEvent");
             return convertToMeetingCreateSseEvent(meetingCreateNotification);
         }
         if (notification instanceof MeetingUpdateTimeNotification meetingUpdateTimeNotification) {
+            log.info("convertToMeetingUpdateTimeSseEvent");
             return convertToMeetingUpdateTimeSseEvent(meetingUpdateTimeNotification);
         }
         if (notification instanceof MeetingUpdateNotTimeNotification meetingUpdateNotTimeNotification) {
+            log.info("convertToMeetingUpdateNotTimeSseEvent");
             return convertToMeetingUpdateNotTimeSseEvent(meetingUpdateNotTimeNotification);
         }
         if (notification instanceof MeetingDeleteNotification meetingDeleteNotification) {
+            log.info("convertToMeetingDeleteSseEvent");
             return convertToMeetingDeleteSseEvent(meetingDeleteNotification);
         }
         if (notification instanceof AttendeeResponseNotification attendeeResponseNotification) {
+            log.info("convertToAttendeeResponseSseEvent");
             return convertToAttendeeResponseSseEvent(attendeeResponseNotification);
         }
         if (notification instanceof AttendeeProposalNotification attendeeProposalNotification) {
+            log.info("convertToAttendeeProposalSseEvent");
             return convertToAttendeeProposalSseEvent(attendeeProposalNotification);
         }
 
+        log.info("Unknown notification type: {}", notification.getClass().getName());
         return Mono.empty();
     }
 
@@ -246,11 +253,11 @@ public class NotificationEventConverter {
                 scheduleServiceClient.getSchedule(
                         meetingCreateNotification.getScheduleId(),
                         meetingCreateNotification.getReceiverId())
-                    .subscribeOn(Schedulers.boundedElastic()))
+                    .subscribeOn(Schedulers.boundedElastic())
+            )
             .map(tuple -> {
                 ZoneId memberTimezone = tuple.getT1();
                 var scheduleInfo = tuple.getT2();
-                log.info("scheduleInfo: {}", scheduleInfo.getName());
                 LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(
                     meetingCreateNotification.getOccurredAt(), memberTimezone);
                 LocalDateTime zonedStartTime = TimeZoneConvertUtils.convertToZone(

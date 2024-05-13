@@ -4,10 +4,13 @@ import com.edgescheduler.notificationservice.event.AttendeeStatus;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Service
 public class ScheduleServiceClient {
 
@@ -18,13 +21,17 @@ public class ScheduleServiceClient {
     }
 
     public Mono<ScheduleInfo> getSchedule(Long scheduleId, Integer receiverId) {
+        log.info("scheduleId: {}, receiverId: {}", scheduleId, receiverId);
         return webClient.get()
             .uri(uriBuilder -> uriBuilder.path("/schedules/{scheduleId}/simple")
                 .queryParam("receiverId", receiverId)
                 .build(scheduleId))
             .retrieve()
             .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
-                response -> Mono.error(new RuntimeException("Failed to get schedule info")))
+                response -> {
+                    log.error("Failed to get schedule info");
+                    return Mono.error(new RuntimeException("Failed to get schedule info"));
+                })
             .bodyToMono(ScheduleInfo.class)
             .onErrorResume(e -> Mono.just(      // for stubbing
                 ScheduleInfo.builder()
