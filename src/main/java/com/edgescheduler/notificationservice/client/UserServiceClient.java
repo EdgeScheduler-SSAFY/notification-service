@@ -29,7 +29,7 @@ public class UserServiceClient {
                 UserInfo.builder()
                     .id(id)
                     .name("Unknown")
-                    .build()
+                    .build())
             );
     }
 
