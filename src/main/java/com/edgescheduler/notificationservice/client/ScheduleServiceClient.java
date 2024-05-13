@@ -34,6 +34,7 @@ public class ScheduleServiceClient {
         private String organizerName;
         private LocalDateTime startDatetime;
         private LocalDateTime endDatetime;
+        private Integer runningTime;
         private AttendeeStatus receiverStatus;
     }
 }

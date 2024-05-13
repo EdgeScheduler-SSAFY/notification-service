@@ -20,6 +20,7 @@ public class MeetingUpdateMessage extends NotificationMessage {
     private LocalDateTime previousEndTime;
     private LocalDateTime updatedStartTime;
     private LocalDateTime updatedEndTime;
+    private Integer runningTime;
     private List<Integer> maintainedAttendeeIds;
     private List<Integer> addedAttendeeIds;
     private List<Integer> removedAttendeeIds;

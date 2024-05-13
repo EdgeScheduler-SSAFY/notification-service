@@ -89,6 +89,7 @@ public class NotificationEventConverter {
                     .attendeeName(attendeeInfo.getName())
                     .proposedStartTime(zonedProposedStartTime)
                     .proposedEndTime(zonedProposedEndTime)
+                    .runningTime(attendeeProposalNotification.getRunningTime())
                     .build();
             });
     }
@@ -148,6 +149,9 @@ public class NotificationEventConverter {
                     .organizerName(organizerInfo.getName())
                     .scheduleId(null)
                     .scheduleName(meetingDeleteNotification.getScheduleName())
+                    .startTime(meetingDeleteNotification.getStartTime())
+                    .endTime(meetingDeleteNotification.getEndTime())
+                    .runningTime(meetingDeleteNotification.getRunningTime())
                     .build();
             });
     }
@@ -183,6 +187,7 @@ public class NotificationEventConverter {
                         .scheduleName(scheduleInfo.getName())
                         .startTime(zonedStartTime)
                         .endTime(zonedEndTime)
+                        .runningTime(scheduleInfo.getRunningTime())
                         .updatedFields(meetingUpdateNotTimeNotification.getUpdatedFields())
                         .build();
                 }
@@ -225,6 +230,7 @@ public class NotificationEventConverter {
                         .previousEndTime(zonedPreviousEndTime)
                         .updatedStartTime(zonedUpdatedStartTime)
                         .updatedEndTime(zonedUpdatedEndTime)
+                        .runningTime(scheduleInfo.getRunningTime())
                         .build();
                 }
             );
@@ -260,6 +266,7 @@ public class NotificationEventConverter {
                     .scheduleName(scheduleInfo.getName())
                     .startTime(zonedStartTime)
                     .endTime(zonedEndTime)
+                    .runningTime(scheduleInfo.getRunningTime())
                     .build();
             });
     }

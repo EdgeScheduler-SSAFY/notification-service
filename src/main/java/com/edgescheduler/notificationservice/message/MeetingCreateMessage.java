@@ -17,5 +17,6 @@ public class MeetingCreateMessage extends NotificationMessage {
     private String organizerName;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private Integer runningTime;
     private List<Integer> attendeeIds;
 }

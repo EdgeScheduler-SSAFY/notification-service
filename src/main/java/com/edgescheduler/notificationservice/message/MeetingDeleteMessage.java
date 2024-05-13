@@ -17,5 +17,6 @@ public class MeetingDeleteMessage extends NotificationMessage {
     private String organizerName;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private Integer runningTime;
     private List<Integer> attendeeIds;
 }

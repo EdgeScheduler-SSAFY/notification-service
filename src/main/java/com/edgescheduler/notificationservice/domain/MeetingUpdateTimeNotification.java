@@ -16,4 +16,5 @@ public class MeetingUpdateTimeNotification extends Notification {
     private LocalDateTime previousEndTime;
     private LocalDateTime updatedStartTime;
     private LocalDateTime updatedEndTime;
+    private Integer runningTime;
 }

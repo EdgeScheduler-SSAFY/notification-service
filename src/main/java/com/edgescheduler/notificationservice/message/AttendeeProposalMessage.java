@@ -17,5 +17,6 @@ public class AttendeeProposalMessage extends NotificationMessage {
     private String attendeeName;
     private LocalDateTime proposedStartTime;
     private LocalDateTime proposedEndTime;
+    private Integer runningTime;
     private String reason;
 }

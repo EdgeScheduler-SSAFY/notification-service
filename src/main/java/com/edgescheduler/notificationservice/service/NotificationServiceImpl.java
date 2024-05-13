@@ -99,6 +99,7 @@ public class NotificationServiceImpl implements NotificationService {
                     .organizerName(meetingCreateMessage.getOrganizerName())
                     .startTime(meetingCreateMessage.getStartTime())
                     .endTime(meetingCreateMessage.getEndTime())
+                    .runningTime(meetingCreateMessage.getRunningTime())
                     .receiverStatus(AttendeeStatus.PENDING)
                     .isRead(notification.getIsRead())
                     .build();
@@ -136,6 +137,7 @@ public class NotificationServiceImpl implements NotificationService {
                         .organizerName(meetingUpdateMessage.getOrganizerName())
                         .startTime(meetingUpdateMessage.getUpdatedStartTime())
                         .endTime(meetingUpdateMessage.getUpdatedEndTime())
+                        .runningTime(meetingUpdateMessage.getRunningTime())
                         .receiverStatus(AttendeeStatus.PENDING)
                         .isRead(notification.getIsRead())
                         .build());
@@ -150,6 +152,7 @@ public class NotificationServiceImpl implements NotificationService {
                                 .organizerId(message.getOrganizerId())
                                 .startTime(message.getUpdatedStartTime())
                                 .endTime(message.getUpdatedEndTime())
+                                .runningTime(message.getRunningTime())
                                 .build()).toList()
                     ).flatMapMany(notificationRepository::saveAll)
                     .map(notification -> MeetingDeleteSseEvent.builder()
@@ -162,6 +165,7 @@ public class NotificationServiceImpl implements NotificationService {
                         .organizerName(meetingUpdateMessage.getOrganizerName())
                         .startTime(notification.getStartTime())
                         .endTime(notification.getEndTime())
+                        .runningTime(notification.getRunningTime())
                         .isRead(notification.getIsRead())
                         .build());
 
@@ -187,6 +191,7 @@ public class NotificationServiceImpl implements NotificationService {
                         .organizerName(meetingUpdateMessage.getOrganizerName())
                         .startTime(meetingUpdateMessage.getUpdatedStartTime())
                         .endTime(meetingUpdateMessage.getUpdatedEndTime())
+                        .runningTime(meetingUpdateMessage.getRunningTime())
                         .updatedFields(notification.getUpdatedFields())
                         .build());
 
@@ -203,6 +208,7 @@ public class NotificationServiceImpl implements NotificationService {
                                         .previousEndTime(message.getPreviousEndTime())
                                         .updatedStartTime(message.getUpdatedStartTime())
                                         .updatedEndTime(message.getUpdatedEndTime())
+                                        .runningTime(message.getRunningTime())
                                         .build()).toList()
                             ).flatMapMany(notificationRepository::saveAll)
                             .map(notification -> MeetingUpdateTimeSseEvent.builder()
@@ -219,6 +225,7 @@ public class NotificationServiceImpl implements NotificationService {
                                 .previousEndTime(notification.getPreviousEndTime())
                                 .updatedStartTime(notification.getUpdatedStartTime())
                                 .updatedEndTime(notification.getUpdatedEndTime())
+                                .runningTime(notification.getRunningTime())
                                 .receiverStatus(AttendeeStatus.PENDING)
                                 .build())
                     );
@@ -244,6 +251,7 @@ public class NotificationServiceImpl implements NotificationService {
                             .organizerId(message.getOrganizerId())
                             .startTime(message.getStartTime())
                             .endTime(message.getEndTime())
+                            .runningTime(message.getRunningTime())
                             .build()).toList();
                 return notificationRepository.saveAll(notifications);
             }).map(notification -> MeetingDeleteSseEvent.builder()
@@ -256,6 +264,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .organizerName(meetingDeleteMessage.getOrganizerName())
                 .startTime(notification.getStartTime())
                 .endTime(notification.getEndTime())
+                .runningTime(notification.getRunningTime())
                 .isRead(notification.getIsRead())
                 .build());
     }
@@ -299,6 +308,7 @@ public class NotificationServiceImpl implements NotificationService {
                     .attendeeId(message.getAttendeeId())
                     .proposedStartTime(message.getProposedStartTime())
                     .proposedEndTime(message.getProposedEndTime())
+                    .runningTime(message.getRunningTime())
                     .reason(message.getReason())
                     .build();
                 return notificationRepository.save(notification);
@@ -314,6 +324,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .attendeeName(attendeeProposalMessage.getAttendeeName())
                 .proposedStartTime(notification.getProposedStartTime())
                 .proposedEndTime(notification.getProposedEndTime())
+                .runningTime(notification.getRunningTime())
                 .reason(notification.getReason())
                 .build());
     }

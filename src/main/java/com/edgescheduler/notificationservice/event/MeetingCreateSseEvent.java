@@ -14,5 +14,6 @@ public class MeetingCreateSseEvent extends NotificationSseEvent {
     private String organizerName;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private Integer runningTime;
     private AttendeeStatus receiverStatus;
 }

@@ -14,5 +14,6 @@ public class AttendeeProposalSseEvent extends NotificationSseEvent {
     private String attendeeName;
     private LocalDateTime proposedStartTime;
     private LocalDateTime proposedEndTime;
+    private Integer runningTime;
     private String reason;
 }
