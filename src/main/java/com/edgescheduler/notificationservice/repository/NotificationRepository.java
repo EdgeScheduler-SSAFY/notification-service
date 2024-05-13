@@ -16,5 +16,5 @@ public interface NotificationRepository extends ReactiveMongoRepository<Notifica
     @Query(value = "{ 'receiverId' : ?0, 'occurredAt' : { $gte : ?1 } }", sort = "{ 'occurredAt' : -1 }")
     Flux<Notification> findNotificationsAfterWithPaging(Integer receiverId, LocalDateTime occurredAt, Pageable pageable);
 
-    Mono<Integer> countByReceiverIdAndOccurredAtGreaterThanEqual(Integer receiverId, LocalDateTime occurredAt);
+    Mono<Long> countByReceiverIdAndOccurredAtGreaterThanEqual(Integer receiverId, LocalDateTime occurredAt);
 }

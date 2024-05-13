@@ -203,6 +203,65 @@ class NotificationRepositoryTest {
         );
     }
 
+    @Test
+    void countByReceiverIdAndOccurredAtGreaterThanEqualTest() {
+
+        LocalDateTime now = LocalDateTime.now();
+        var not1 = MeetingCreateNotification.builder()
+            .receiverId(1)
+            .occurredAt(now)
+            .scheduleId(1L)
+            .build();
+
+        var not2 = AttendeeResponseNotification.builder()
+            .receiverId(1)
+            .occurredAt(now.minusMinutes(1))
+            .scheduleId(2L)
+            .attendeeId(2)
+            .response(Response.ACCEPTED)
+            .build();
+
+        var not3 = MeetingUpdateTimeNotification.builder()
+            .receiverId(1)
+            .occurredAt(now.minusMinutes(2))
+            .scheduleId(3L)
+            .previousStartTime(LocalDateTime.now())
+            .previousEndTime(LocalDateTime.now().plusMinutes(30))
+            .updatedStartTime(LocalDateTime.now().plusHours(1))
+            .updatedEndTime(LocalDateTime.now().plusHours(1).plusMinutes(30))
+            .build();
+
+        var not4 = MeetingUpdateNotTimeNotification.builder()
+            .receiverId(1)
+            .occurredAt(now.minusMinutes(3))
+            .scheduleId(4L)
+            .updatedFields(List.of(UpdatedField.TIME, UpdatedField.TITLE))
+            .build();
+
+        var not5 = MeetingDeleteNotification.builder()
+            .receiverId(1)
+            .occurredAt(now.minusMinutes(4))
+            .scheduleName("Meeting 5")
+            .build();
+
+        var not6 = AttendeeProposalNotification.builder()
+            .receiverId(1)
+            .occurredAt(now.minusMinutes(5))
+            .scheduleId(6L)
+            .attendeeId(2)
+            .build();
+
+
+        Flux<Notification> notificationFlux = notificationRepository.saveAll(
+            Flux.just(not1, not2, not3, not4, not5, not6));
+        List<Notification> block = notificationFlux.collectList().block();
+
+        var count = notificationRepository.countByReceiverIdAndOccurredAtGreaterThanEqual(1, now.minusMinutes(6)).block();
+
+        assertNotNull(count);
+        assertEquals(6, count);
+    }
+
     @AfterEach
     void tearDown() {
         notificationRepository.deleteAll().block();

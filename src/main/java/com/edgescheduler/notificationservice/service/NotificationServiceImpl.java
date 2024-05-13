@@ -348,7 +348,7 @@ public class NotificationServiceImpl implements NotificationService {
                 receiverId, LocalDateTime.now().minusDays(14)))
             .map(tuple -> {
                 List<NotificationSseEvent> data = tuple.getT1();
-                Integer total = tuple.getT2();
+                Integer total = Math.toIntExact(tuple.getT2());
                 return NotificationPage.builder()
                     .page(page)
                     .size(size)
