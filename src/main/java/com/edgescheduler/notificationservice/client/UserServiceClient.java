@@ -24,13 +24,23 @@ public class UserServiceClient {
     public Mono<UserInfo> getUserInfo(Integer id) {
         return webClient.get()
             .uri("/members/{id}", id)
-            .retrieve().bodyToMono(UserInfo.class)
+            .retrieve()
+            .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
+                response -> Mono.error(new RuntimeException("Failed to get user info")))
+            .bodyToMono(UserInfo.class)
             .onErrorResume(e -> Mono.just(
                 UserInfo.builder()
                     .id(id)
                     .name("Unknown")
                     .build())
-            );
+            )
+            .switchIfEmpty(Mono.just(
+                UserInfo.builder()
+                    .id(id)
+                    .name("Unknown")
+                    .build())
+            )
+            ;
     }
 
     @Getter

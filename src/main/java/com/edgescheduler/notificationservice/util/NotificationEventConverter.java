@@ -21,10 +21,12 @@ import com.edgescheduler.notificationservice.service.MemberInfoService;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class NotificationEventConverter {
@@ -248,6 +250,7 @@ public class NotificationEventConverter {
             .map(tuple -> {
                 ZoneId memberTimezone = tuple.getT1();
                 var scheduleInfo = tuple.getT2();
+                log.info("scheduleInfo: {}", scheduleInfo.getName());
                 LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(
                     meetingCreateNotification.getOccurredAt(), memberTimezone);
                 LocalDateTime zonedStartTime = TimeZoneConvertUtils.convertToZone(
