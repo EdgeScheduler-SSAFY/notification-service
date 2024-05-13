@@ -240,6 +240,7 @@ public class NotificationEventConverter {
                         .updatedStartTime(zonedUpdatedStartTime)
                         .updatedEndTime(zonedUpdatedEndTime)
                         .runningTime(scheduleInfo.getRunningTime())
+                        .receiverStatus(scheduleInfo.getReceiverStatus())
                         .build();
                 }
             );
@@ -277,6 +278,7 @@ public class NotificationEventConverter {
                     .startTime(zonedStartTime)
                     .endTime(zonedEndTime)
                     .runningTime(scheduleInfo.getRunningTime())
+                    .receiverStatus(scheduleInfo.getReceiverStatus())
                     .build();
             });
     }
