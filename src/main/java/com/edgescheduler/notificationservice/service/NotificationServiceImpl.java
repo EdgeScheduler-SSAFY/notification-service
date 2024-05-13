@@ -289,6 +289,8 @@ public class NotificationServiceImpl implements NotificationService {
                 .occurredAt(notification.getOccurredAt())
                 .scheduleId(notification.getScheduleId())
                 .scheduleName(attendeeResponseMessage.getScheduleName())
+                .startTime(attendeeResponseMessage.getStartTime())
+                .endTime(attendeeResponseMessage.getEndTime())
                 .attendeeId(notification.getAttendeeId())
                 .attendeeName(attendeeResponseMessage.getAttendeeName())
                 .response(notification.getResponse())

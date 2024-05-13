@@ -3,6 +3,7 @@ package com.edgescheduler.notificationservice.service;
 import com.edgescheduler.notificationservice.domain.MemberInfo;
 import com.edgescheduler.notificationservice.repository.MemberInfoRepository;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class MemberInfoService {
                     memberTimezoneMap.put(memberId, zoneId);
                     return zoneId;
                 })
-                .switchIfEmpty(Mono.just(ZoneId.systemDefault())));
+                .switchIfEmpty(Mono.just(ZoneOffset.UTC)));
     }
 
     public Mono<Void> upsertMemberTimezone(Integer memberId, String timezone) {

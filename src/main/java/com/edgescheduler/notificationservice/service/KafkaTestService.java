@@ -60,6 +60,8 @@ public class KafkaTestService {
             .occurredAt(LocalDateTime.now())
             .scheduleId(1L)
             .scheduleName("Meeting")
+            .startTime(LocalDateTime.now())
+            .endTime(LocalDateTime.now().plusHours(1))
             .organizerId(1)
             .attendeeId(2)
             .attendeeName("Attendee")

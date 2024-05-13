@@ -128,6 +128,8 @@ public class NotificationEventConverter {
                     .isRead(attendeeResponseNotification.getIsRead())
                     .scheduleId(scheduleInfo.getScheduleId())
                     .scheduleName(scheduleInfo.getName())
+                    .startTime(scheduleInfo.getStartDatetime())
+                    .endTime(scheduleInfo.getEndDatetime())
                     .attendeeId(attendeeResponseNotification.getAttendeeId())
                     .attendeeName(attendeeInfo.getName())
                     .response(attendeeResponseNotification.getResponse())
