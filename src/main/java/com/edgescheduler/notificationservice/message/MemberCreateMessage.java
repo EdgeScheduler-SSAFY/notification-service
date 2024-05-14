@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MemberCreateMessage {
 
-    private Integer id;
+    private Integer memberId;
     private String email;
     private String zoneId;
 }
