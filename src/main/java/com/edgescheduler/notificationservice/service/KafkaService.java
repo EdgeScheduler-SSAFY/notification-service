@@ -1,8 +1,7 @@
 package com.edgescheduler.notificationservice.service;
 
-import com.edgescheduler.notificationservice.domain.MemberInfo;
 import com.edgescheduler.notificationservice.message.ChangeTimeZoneMessage;
-import com.edgescheduler.notificationservice.message.MemberEmailMessage;
+import com.edgescheduler.notificationservice.message.MemberCreateMessage;
 import com.edgescheduler.notificationservice.message.NotificationMessage;
 import com.edgescheduler.notificationservice.repository.MemberInfoRepository;
 import java.time.ZoneId;
@@ -23,8 +22,7 @@ public class KafkaService implements ApplicationRunner {
     private final EventSinkManager eventSinkManager;
     private final ReactiveKafkaConsumerTemplate<String, NotificationMessage> notificationQueue;
     private final ReactiveKafkaConsumerTemplate<String, ChangeTimeZoneMessage> timeZoneQueue;
-    private final ReactiveKafkaConsumerTemplate<String, MemberEmailMessage> emailQueue;
-    private final MemberInfoRepository memberInfoRepository;
+    private final ReactiveKafkaConsumerTemplate<String, MemberCreateMessage> signupQueue;
     private final MemberInfoService memberInfoService;
     private final NotificationService notificationService;
     private final EmailService emailService;
@@ -52,6 +50,7 @@ public class KafkaService implements ApplicationRunner {
             .receiveAutoAck()
             .flatMap(record -> {
                 ChangeTimeZoneMessage message = record.value();
+                log.info("Consumed timezone message: {}", message.toString());
                 return memberInfoService.upsertZoneIdOfMember(
                     message.getMemberId(), ZoneId.of(message.getZoneId())
                 );
@@ -60,12 +59,12 @@ public class KafkaService implements ApplicationRunner {
                 error -> log.error("Error consuming timezone message: {}", error.getMessage()))
             .subscribe();
 
-        this.emailQueue
+        this.signupQueue
             .receiveAutoAck()
             .flatMap(record -> {
-                MemberEmailMessage message = record.value();
-                return memberInfoService.upsertEmailOfMember(
-                    message.getId(), message.getEmail()
+                MemberCreateMessage message = record.value();
+                return memberInfoService.upsertMemberInfo(
+                    message.getId(), message.getEmail(), message.getZoneId()
                 );
             })
             .doOnError(
