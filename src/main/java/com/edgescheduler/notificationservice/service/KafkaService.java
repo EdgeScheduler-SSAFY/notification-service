@@ -3,7 +3,6 @@ package com.edgescheduler.notificationservice.service;
 import com.edgescheduler.notificationservice.message.ChangeTimeZoneMessage;
 import com.edgescheduler.notificationservice.message.MemberCreateMessage;
 import com.edgescheduler.notificationservice.message.NotificationMessage;
-import com.edgescheduler.notificationservice.repository.MemberInfoRepository;
 import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,7 +63,7 @@ public class KafkaService implements ApplicationRunner {
             .flatMap(record -> {
                 MemberCreateMessage message = record.value();
                 return memberInfoService.upsertMemberInfo(
-                    message.getId(), message.getEmail(), message.getZoneId()
+                    message.getMemberId(), message.getEmail(), message.getZoneId()
                 );
             })
             .doOnError(
