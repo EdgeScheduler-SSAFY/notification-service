@@ -50,11 +50,11 @@ public class TestController {
         return kafkaService.publishAttendeeProposalEvent();
     }
 
-    @PostMapping("/send-email")
-    public Mono<String> test5(){
-        return emailService.send("oh052679@naver.com", "해치웠나?", "제발...!")
-            .flatMap(mimeMessage -> Mono.just("Email sent"));
-    }
+//    @PostMapping("/send-email")
+//    public Mono<String> test5(){
+//        return emailService.send("oh052679@naver.com", "해치웠나?", "제발...!")
+//            .flatMap(mimeMessage -> Mono.just("Email sent"));
+//    }
 
     @GetMapping("/user-service/{id}")
     public Mono<UserInfo> test6(@PathVariable Integer id){

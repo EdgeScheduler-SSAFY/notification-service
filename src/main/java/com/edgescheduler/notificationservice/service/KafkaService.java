@@ -36,10 +36,13 @@ public class KafkaService implements ApplicationRunner {
                     record.value().getClass().getName(), record.partition(), record.offset()))
             .flatMapSequential(
                 record -> notificationService.saveNotificationFromEventMessage(record.value()))
-            .flatMap(event -> Mono.zip(
+            .flatMap(event ->
+//                Mono.zip(
+//                    eventSinkManager.sendEvent(event.getReceiverId(), event.getType().toString(),
+//                        event).subscribeOn(Schedulers.boundedElastic()),
+//                    emailService.sendEmail(event).subscribeOn(Schedulers.boundedElastic()))
                     eventSinkManager.sendEvent(event.getReceiverId(), event.getType().toString(),
-                        event).subscribeOn(Schedulers.boundedElastic()),
-                    emailService.sendEmail(event))
+                        event).subscribeOn(Schedulers.boundedElastic())
             )
             .doOnError(
                 error -> log.error("Error consuming notification message: {}", error.getMessage()))
