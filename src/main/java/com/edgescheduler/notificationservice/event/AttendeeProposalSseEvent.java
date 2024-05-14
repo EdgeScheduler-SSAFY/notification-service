@@ -16,6 +16,8 @@ public class AttendeeProposalSseEvent extends NotificationSseEvent {
 
     private Integer attendeeId;
     private String attendeeName;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
     private LocalDateTime proposedStartTime;
     private LocalDateTime proposedEndTime;
     private Integer runningTime;
@@ -32,6 +34,8 @@ public class AttendeeProposalSseEvent extends NotificationSseEvent {
             .isRead(notification.getIsRead())
             .scheduleId(notification.getScheduleId())
             .scheduleName(message.getScheduleName())
+            .startTime(message.getStartTime())
+            .endTime(message.getEndTime())
             .attendeeId(notification.getAttendeeId())
             .attendeeName(message.getAttendeeName())
             .proposedStartTime(notification.getProposedStartTime())
@@ -57,6 +61,8 @@ public class AttendeeProposalSseEvent extends NotificationSseEvent {
             .isRead(attendeeProposalNotification.getIsRead())
             .scheduleId(scheduleInfo.getScheduleId())
             .scheduleName(scheduleInfo.getName())
+            .startTime(scheduleInfo.getStartDatetime())
+            .endTime(scheduleInfo.getEndDatetime())
             .attendeeId(attendeeProposalNotification.getAttendeeId())
             .attendeeName(attendeeInfo.getName())
             .proposedStartTime(zonedProposedStartTime)
