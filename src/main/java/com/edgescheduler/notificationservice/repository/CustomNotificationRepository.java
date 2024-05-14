@@ -5,7 +5,7 @@ import reactor.core.publisher.Mono;
 
 public interface CustomNotificationRepository {
 
-    Mono<Void> markAsRead(Long notificationId);
+    Mono<Void> markAsRead(String notificationId);
 
-    Mono<Void> markAllAsRead(List<Long> notificationIds);
+    Mono<Void> markAllAsRead(List<String> notificationIds);
 }

@@ -18,13 +18,13 @@ public class CustomNotificationRepositoryImpl implements CustomNotificationRepos
     ReactiveMongoTemplate mongoTemplate;
 
     @Override
-    public Mono<Void> markAsRead(Long notificationId) {
+    public Mono<Void> markAsRead(String notificationId) {
         return mongoTemplate.updateFirst(query(where("id").is(notificationId)),
             new Update().set("isRead", true), Notification.class).then();
     }
 
     @Override
-    public Mono<Void> markAllAsRead(List<Long> notificationIds) {
+    public Mono<Void> markAllAsRead(List<String> notificationIds) {
         return mongoTemplate.updateMulti(
             query(where("_id").in(notificationIds).and("isRead").is(false)),
             new Update().set("isRead", true), Notification.class).then();

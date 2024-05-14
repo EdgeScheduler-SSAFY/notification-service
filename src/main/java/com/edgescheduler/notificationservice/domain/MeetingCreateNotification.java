@@ -1,6 +1,7 @@
 package com.edgescheduler.notificationservice.domain;
 
-import java.time.LocalDateTime;
+import com.edgescheduler.notificationservice.message.MeetingCreateMessage;
+import com.edgescheduler.notificationservice.message.MeetingUpdateMessage;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -13,10 +14,21 @@ import org.springframework.data.annotation.TypeAlias;
 public class MeetingCreateNotification extends Notification {
     private Long scheduleId;
 
-    // temporary
-    private String scheduleName;
-    private Integer organizerId;
-    private String organizerName;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    public static MeetingCreateNotification from(Integer attendeeId, MeetingCreateMessage message) {
+        return MeetingCreateNotification.builder()
+            .receiverId(attendeeId)
+            .occurredAt(message.getOccurredAt())
+            .isRead(false)
+            .scheduleId(message.getScheduleId())
+            .build();
+    }
+
+    public static MeetingCreateNotification from(Integer attendeeId, MeetingUpdateMessage message) {
+        return MeetingCreateNotification.builder()
+            .receiverId(attendeeId)
+            .occurredAt(message.getOccurredAt())
+            .isRead(false)
+            .scheduleId(message.getScheduleId())
+            .build();
+    }
 }

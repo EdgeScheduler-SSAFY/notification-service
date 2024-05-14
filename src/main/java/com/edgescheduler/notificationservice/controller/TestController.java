@@ -1,12 +1,17 @@
 package com.edgescheduler.notificationservice.controller;
 
+import com.edgescheduler.notificationservice.client.ScheduleServiceClient;
+import com.edgescheduler.notificationservice.client.ScheduleServiceClient.ScheduleInfo;
 import com.edgescheduler.notificationservice.client.UserServiceClient;
+import com.edgescheduler.notificationservice.client.UserServiceClient.UserInfo;
 import com.edgescheduler.notificationservice.service.EmailService;
 import com.edgescheduler.notificationservice.service.KafkaTestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
@@ -18,6 +23,7 @@ public class TestController {
     private final KafkaTestService kafkaService;
     private final EmailService emailService;
     private final UserServiceClient userServiceClient;
+    private final ScheduleServiceClient scheduleServiceClient;
 
     @PostMapping("/meeting-created")
     public Mono<String> test(){
@@ -46,12 +52,20 @@ public class TestController {
 
     @PostMapping("/send-email")
     public Mono<String> test5(){
-        return emailService.sendEmail("oh052679@naver.com", "해치웠나?", "제발...!")
+        return emailService.send("oh052679@naver.com", "해치웠나?", "제발...!")
             .flatMap(mimeMessage -> Mono.just("Email sent"));
     }
 
-    @GetMapping("/user-service/uncheck")
-    public Mono<String> test6(){
-        return userServiceClient.getUncheck();
+    @GetMapping("/user-service/{id}")
+    public Mono<UserInfo> test6(@PathVariable Integer id){
+        return userServiceClient.getUserInfo(id);
+    }
+
+    @GetMapping("/schedule-service/{scheduleId}")
+    public Mono<ScheduleInfo> test8(
+        @PathVariable Long scheduleId,
+        @RequestParam Integer receiverId
+    ){
+        return scheduleServiceClient.getSchedule(scheduleId, receiverId);
     }
 }

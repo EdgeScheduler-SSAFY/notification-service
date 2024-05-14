@@ -8,7 +8,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder
 @NoArgsConstructor
-public class KafkaEventMessage {
+public class NotificationMessage {
 
     private LocalDateTime occurredAt;
 }

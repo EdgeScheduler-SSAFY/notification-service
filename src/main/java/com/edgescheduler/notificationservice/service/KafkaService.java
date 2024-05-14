@@ -1,9 +1,11 @@
 package com.edgescheduler.notificationservice.service;
 
-import com.edgescheduler.notificationservice.domain.MemberTimezone;
+import com.edgescheduler.notificationservice.domain.MemberInfo;
 import com.edgescheduler.notificationservice.message.ChangeTimeZoneMessage;
-import com.edgescheduler.notificationservice.message.KafkaEventMessage;
-import com.edgescheduler.notificationservice.repository.MemberTimezoneRepository;
+import com.edgescheduler.notificationservice.message.MemberEmailMessage;
+import com.edgescheduler.notificationservice.message.NotificationMessage;
+import com.edgescheduler.notificationservice.repository.MemberInfoRepository;
+import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -19,9 +21,11 @@ import reactor.core.scheduler.Schedulers;
 public class KafkaService implements ApplicationRunner {
 
     private final EventSinkManager eventSinkManager;
-    private final ReactiveKafkaConsumerTemplate<String, KafkaEventMessage> notificationQueue;
+    private final ReactiveKafkaConsumerTemplate<String, NotificationMessage> notificationQueue;
     private final ReactiveKafkaConsumerTemplate<String, ChangeTimeZoneMessage> timeZoneQueue;
-    private final MemberTimezoneRepository memberTimezoneRepository;
+    private final ReactiveKafkaConsumerTemplate<String, MemberEmailMessage> emailQueue;
+    private final MemberInfoRepository memberInfoRepository;
+    private final MemberInfoService memberInfoService;
     private final NotificationService notificationService;
     private final EmailService emailService;
 
@@ -30,21 +34,16 @@ public class KafkaService implements ApplicationRunner {
         this.notificationQueue
             .receiveAutoAck()
             .publishOn(Schedulers.boundedElastic())
-            .flatMapSequential(record -> {
-                log.info("Notification message received");
-                log.info("Consumed message: {} | From partition: {} | From offset: {}",
-                    record.value().getClass().getName(), record.partition(), record.offset());
-                return notificationService.saveNotificationFromEventMessage(record.value());
-            })
-            .flatMap(event -> {
-                log.info("Sending event to receiver: {}", event.getReceiverId());
-//                return Mono.zip(
-//                    eventSinkManager.sendEvent(event.getReceiverId(), event.getType().toString(), event).subscribeOn(Schedulers.boundedElastic()),
-//                    emailService.sendEmail("oh052679@naver.com", event.getReceiverId() + "번 유저에게.", event.getType().toString()).subscribeOn(Schedulers.boundedElastic())
-//                );
-                return eventSinkManager.sendEvent(event.getReceiverId(), event.getType().toString(),
-                    event).subscribeOn(Schedulers.boundedElastic());
-            })
+            .doOnNext(
+                record -> log.info("Consumed message: {} | From partition: {} | From offset: {}",
+                    record.value().getClass().getName(), record.partition(), record.offset()))
+            .flatMapSequential(
+                record -> notificationService.saveNotificationFromEventMessage(record.value()))
+            .flatMap(event -> Mono.zip(
+                    eventSinkManager.sendEvent(event.getReceiverId(), event.getType().toString(),
+                        event).subscribeOn(Schedulers.boundedElastic()),
+                    emailService.sendEmail(event))
+            )
             .doOnError(
                 error -> log.error("Error consuming notification message: {}", error.getMessage()))
             .subscribe();
@@ -52,19 +51,25 @@ public class KafkaService implements ApplicationRunner {
         this.timeZoneQueue
             .receiveAutoAck()
             .flatMap(record -> {
-                log.info("Timezone message received");
                 ChangeTimeZoneMessage message = record.value();
-                log.info("memberId: {} | zoneId: {}", message.getMemberId(), message.getZoneId());
-                return memberTimezoneRepository.findById(message.getMemberId())
-                    .flatMap(memberTimezone -> {
-                        memberTimezone.changeZoneId(message.getZoneId());
-                        return memberTimezoneRepository.save(memberTimezone);
-                    }).switchIfEmpty(Mono.defer(() -> memberTimezoneRepository.save(
-                        new MemberTimezone(message.getMemberId(), message.getZoneId()))
-                    ));
+                return memberInfoService.upsertZoneIdOfMember(
+                    message.getMemberId(), ZoneId.of(message.getZoneId())
+                );
             })
             .doOnError(
                 error -> log.error("Error consuming timezone message: {}", error.getMessage()))
+            .subscribe();
+
+        this.emailQueue
+            .receiveAutoAck()
+            .flatMap(record -> {
+                MemberEmailMessage message = record.value();
+                return memberInfoService.upsertEmailOfMember(
+                    message.getId(), message.getEmail()
+                );
+            })
+            .doOnError(
+                error -> log.error("Error consuming email message: {}", error.getMessage()))
             .subscribe();
     }
 }

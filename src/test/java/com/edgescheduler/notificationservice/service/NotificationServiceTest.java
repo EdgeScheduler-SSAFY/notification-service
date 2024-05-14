@@ -7,7 +7,7 @@ import static org.mockito.Mockito.when;
 import com.edgescheduler.notificationservice.domain.MeetingCreateNotification;
 import com.edgescheduler.notificationservice.event.NotificationSseEvent;
 import com.edgescheduler.notificationservice.message.MeetingCreateMessage;
-import com.edgescheduler.notificationservice.repository.MemberTimezoneRepository;
+import com.edgescheduler.notificationservice.repository.MemberInfoRepository;
 import com.edgescheduler.notificationservice.repository.NotificationRepository;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
@@ -29,10 +29,10 @@ class NotificationServiceTest {
     private NotificationRepository notificationRepository;
 
     @Mock
-    private MemberTimezoneRepository memberTimezoneRepository;
+    private MemberInfoRepository memberInfoRepository;
 
     @InjectMocks
-    private NotificationServiceImpl notificationService;
+    private NotificationService notificationService;
 
     @DisplayName("미팅 생성 메시지로 SSE 이벤트 생성")
     @Test
