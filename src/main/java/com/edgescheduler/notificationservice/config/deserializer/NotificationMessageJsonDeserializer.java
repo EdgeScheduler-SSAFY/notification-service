@@ -1,5 +1,6 @@
 package com.edgescheduler.notificationservice.config.deserializer;
 
+import com.edgescheduler.notificationservice.exception.ErrorCode;
 import com.edgescheduler.notificationservice.message.AttendeeProposalMessage;
 import com.edgescheduler.notificationservice.message.AttendeeResponseMessage;
 import com.edgescheduler.notificationservice.message.NotificationMessage;
@@ -10,10 +11,22 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.header.Headers;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 @Slf4j
 public class NotificationMessageJsonDeserializer extends JsonDeserializer<NotificationMessage> {
+
+    @Value("${kafka.topic.meeting-created}")
+    private String meetingCreatedTopic;
+    @Value("${kafka.topic.meeting-deleted}")
+    private String meetingDeletedTopic;
+    @Value("${kafka.topic.meeting-updated}")
+    private String meetingUpdatedTopic;
+    @Value("${kafka.topic.attendee-response}")
+    private String attendeeResponseTopic;
+    @Value("${kafka.topic.attendee-proposal}")
+    private String attendeeProposalTopic;
 
     public NotificationMessageJsonDeserializer() {
         super(NotificationMessage.class);
@@ -39,13 +52,21 @@ public class NotificationMessageJsonDeserializer extends JsonDeserializer<Notifi
     }
 
     private Class<? extends NotificationMessage> getTargetClass(String topic) {
-        return switch (topic) {
-            case "meeting-created" -> MeetingCreateMessage.class;
-            case "meeting-deleted" -> MeetingDeleteMessage.class;
-            case "meeting-updated" -> MeetingUpdateMessage.class;
-            case "attendee-response" -> AttendeeResponseMessage.class;
-            case "attendee-proposal" -> AttendeeProposalMessage.class;
-            default -> throw new IllegalStateException("Topic 이름 오류, topic = " + topic);
-        };
+        if (topic.equals(meetingCreatedTopic)) {
+            return MeetingCreateMessage.class;
+        }
+        if (topic.equals(meetingDeletedTopic)) {
+            return MeetingDeleteMessage.class;
+        }
+        if (topic.equals(meetingUpdatedTopic)) {
+            return MeetingUpdateMessage.class;
+        }
+        if (topic.equals(attendeeResponseTopic)) {
+            return AttendeeResponseMessage.class;
+        }
+        if (topic.equals(attendeeProposalTopic)) {
+            return AttendeeProposalMessage.class;
+        }
+        throw ErrorCode.KAFKA_TOPIC_NOT_FOUND.exception(topic);
     }
 }

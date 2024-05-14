@@ -52,7 +52,7 @@ public class TestController {
 
     @PostMapping("/send-email")
     public Mono<String> test5(){
-        return emailService.sendEmail("oh052679@naver.com", "해치웠나?", "제발...!")
+        return emailService.send("oh052679@naver.com", "해치웠나?", "제발...!")
             .flatMap(mimeMessage -> Mono.just("Email sent"));
     }
 

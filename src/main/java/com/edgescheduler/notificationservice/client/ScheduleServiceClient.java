@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -16,8 +16,11 @@ public class ScheduleServiceClient {
 
     private final WebClient webClient;
 
+    @Value("${webclient.schedule-service.url}")
+    private String scheduleServiceUrl;
+
     public ScheduleServiceClient(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("http://schedule-service").build();
+        this.webClient = webClientBuilder.baseUrl(scheduleServiceUrl).build();
     }
 
     public Mono<ScheduleInfo> getSchedule(Long scheduleId, Integer receiverId) {
@@ -33,7 +36,7 @@ public class ScheduleServiceClient {
                     return Mono.error(new RuntimeException("Failed to get schedule info"));
                 })
             .bodyToMono(ScheduleInfo.class)
-            .onErrorResume(e -> Mono.just(      // for stubbing
+            .onErrorResume(e -> Mono.just(      // 에러 발생 시 기본값 반환
                 ScheduleInfo.builder()
                     .scheduleId(scheduleId)
                     .name("Unknown")

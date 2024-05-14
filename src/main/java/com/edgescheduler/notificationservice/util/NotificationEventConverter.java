@@ -37,27 +37,21 @@ public class NotificationEventConverter {
 
     public Mono<NotificationSseEvent> convert(Notification notification) {
         if (notification instanceof MeetingCreateNotification meetingCreateNotification) {
-            log.info("convertToMeetingCreateSseEvent");
             return convertToMeetingCreateSseEvent(meetingCreateNotification);
         }
         if (notification instanceof MeetingUpdateTimeNotification meetingUpdateTimeNotification) {
-            log.info("convertToMeetingUpdateTimeSseEvent");
             return convertToMeetingUpdateTimeSseEvent(meetingUpdateTimeNotification);
         }
         if (notification instanceof MeetingUpdateNotTimeNotification meetingUpdateNotTimeNotification) {
-            log.info("convertToMeetingUpdateNotTimeSseEvent");
             return convertToMeetingUpdateNotTimeSseEvent(meetingUpdateNotTimeNotification);
         }
         if (notification instanceof MeetingDeleteNotification meetingDeleteNotification) {
-            log.info("convertToMeetingDeleteSseEvent");
             return convertToMeetingDeleteSseEvent(meetingDeleteNotification);
         }
         if (notification instanceof AttendeeResponseNotification attendeeResponseNotification) {
-            log.info("convertToAttendeeResponseSseEvent");
             return convertToAttendeeResponseSseEvent(attendeeResponseNotification);
         }
         if (notification instanceof AttendeeProposalNotification attendeeProposalNotification) {
-            log.info("convertToAttendeeProposalSseEvent");
             return convertToAttendeeProposalSseEvent(attendeeProposalNotification);
         }
 
@@ -86,20 +80,13 @@ public class NotificationEventConverter {
                     attendeeProposalNotification.getProposedStartTime(), memberTimezone);
                 LocalDateTime zonedProposedEndTime = TimeZoneConvertUtils.convertToZone(
                     attendeeProposalNotification.getProposedEndTime(), memberTimezone);
-                return AttendeeProposalSseEvent.builder()
-                    .id(attendeeProposalNotification.getId())
-                    .type(NotificationType.ATTENDEE_PROPOSAL)
-                    .receiverId(attendeeProposalNotification.getReceiverId())
-                    .occurredAt(zonedOccurredAt)
-                    .isRead(attendeeProposalNotification.getIsRead())
-                    .scheduleId(scheduleInfo.getScheduleId())
-                    .scheduleName(scheduleInfo.getName())
-                    .attendeeId(attendeeProposalNotification.getAttendeeId())
-                    .attendeeName(attendeeInfo.getName())
-                    .proposedStartTime(zonedProposedStartTime)
-                    .proposedEndTime(zonedProposedEndTime)
-                    .runningTime(attendeeProposalNotification.getRunningTime())
-                    .build();
+                return AttendeeProposalSseEvent.convertFrom(
+                    attendeeProposalNotification,
+                    scheduleInfo,
+                    attendeeInfo,
+                    zonedProposedStartTime,
+                    zonedProposedEndTime,
+                    zonedOccurredAt);
             });
     }
 
@@ -120,20 +107,11 @@ public class NotificationEventConverter {
                 var attendeeInfo = tuple.getT3();
                 LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(
                     attendeeResponseNotification.getOccurredAt(), memberTimezone);
-                return AttendeeResponseSseEvent.builder()
-                    .id(attendeeResponseNotification.getId())
-                    .type(NotificationType.ATTENDEE_RESPONSE)
-                    .receiverId(attendeeResponseNotification.getReceiverId())
-                    .occurredAt(zonedOccurredAt)
-                    .isRead(attendeeResponseNotification.getIsRead())
-                    .scheduleId(scheduleInfo.getScheduleId())
-                    .scheduleName(scheduleInfo.getName())
-                    .startTime(scheduleInfo.getStartDatetime())
-                    .endTime(scheduleInfo.getEndDatetime())
-                    .attendeeId(attendeeResponseNotification.getAttendeeId())
-                    .attendeeName(attendeeInfo.getName())
-                    .response(attendeeResponseNotification.getResponse())
-                    .build();
+                return AttendeeResponseSseEvent.convertFrom(
+                    attendeeResponseNotification,
+                    scheduleInfo,
+                    attendeeInfo,
+                    zonedOccurredAt);
             });
     }
 
@@ -150,20 +128,10 @@ public class NotificationEventConverter {
                 var organizerInfo = tuple.getT2();
                 LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(
                     meetingDeleteNotification.getOccurredAt(), memberTimezone);
-                return MeetingDeleteSseEvent.builder()
-                    .id(meetingDeleteNotification.getId())
-                    .type(NotificationType.MEETING_DELETED)
-                    .receiverId(meetingDeleteNotification.getReceiverId())
-                    .occurredAt(zonedOccurredAt)
-                    .isRead(meetingDeleteNotification.getIsRead())
-                    .organizerId(meetingDeleteNotification.getOrganizerId())
-                    .organizerName(organizerInfo.getName())
-                    .scheduleId(null)
-                    .scheduleName(meetingDeleteNotification.getScheduleName())
-                    .startTime(meetingDeleteNotification.getStartTime())
-                    .endTime(meetingDeleteNotification.getEndTime())
-                    .runningTime(meetingDeleteNotification.getRunningTime())
-                    .build();
+                return MeetingDeleteSseEvent.convertFrom(
+                    meetingDeleteNotification,
+                    organizerInfo,
+                    zonedOccurredAt);
             });
     }
 
@@ -186,21 +154,13 @@ public class NotificationEventConverter {
                         scheduleInfo.getStartDatetime(), memberTimezone);
                     LocalDateTime zonedEndTime = TimeZoneConvertUtils.convertToZone(
                         scheduleInfo.getEndDatetime(), memberTimezone);
-                    return MeetingUpdateNotTimeSseEvent.builder()
-                        .id(meetingUpdateNotTimeNotification.getId())
-                        .type(NotificationType.MEETING_UPDATED_FIELDS)
-                        .receiverId(meetingUpdateNotTimeNotification.getReceiverId())
-                        .occurredAt(zonedOccurredAt)
-                        .isRead(meetingUpdateNotTimeNotification.getIsRead())
-                        .organizerId(scheduleInfo.getOrganizerId())
-                        .organizerName(scheduleInfo.getOrganizerName())
-                        .scheduleId(scheduleInfo.getScheduleId())
-                        .scheduleName(scheduleInfo.getName())
-                        .startTime(zonedStartTime)
-                        .endTime(zonedEndTime)
-                        .runningTime(scheduleInfo.getRunningTime())
-                        .updatedFields(meetingUpdateNotTimeNotification.getUpdatedFields())
-                        .build();
+                    return MeetingUpdateNotTimeSseEvent.convertFrom(
+                        meetingUpdateNotTimeNotification,
+                        scheduleInfo,
+                        zonedStartTime,
+                        zonedEndTime,
+                        zonedOccurredAt
+                    );
                 }
             );
     }
@@ -227,23 +187,15 @@ public class NotificationEventConverter {
                         meetingUpdateTimeNotification.getUpdatedStartTime(), memberTimezone);
                     LocalDateTime zonedUpdatedEndTime = TimeZoneConvertUtils.convertToZone(
                         meetingUpdateTimeNotification.getUpdatedEndTime(), memberTimezone);
-                    return MeetingUpdateTimeSseEvent.builder()
-                        .id(meetingUpdateTimeNotification.getId())
-                        .type(NotificationType.MEETING_UPDATED_TIME)
-                        .receiverId(meetingUpdateTimeNotification.getReceiverId())
-                        .occurredAt(zonedOccurredAt)
-                        .isRead(meetingUpdateTimeNotification.getIsRead())
-                        .organizerId(scheduleInfo.getOrganizerId())
-                        .organizerName(scheduleInfo.getOrganizerName())
-                        .scheduleId(scheduleInfo.getScheduleId())
-                        .scheduleName(scheduleInfo.getName())
-                        .previousStartTime(zonedPreviousStartTime)
-                        .previousEndTime(zonedPreviousEndTime)
-                        .updatedStartTime(zonedUpdatedStartTime)
-                        .updatedEndTime(zonedUpdatedEndTime)
-                        .runningTime(scheduleInfo.getRunningTime())
-                        .receiverStatus(scheduleInfo.getReceiverStatus())
-                        .build();
+                    return MeetingUpdateTimeSseEvent.convertFrom(
+                        meetingUpdateTimeNotification,
+                        scheduleInfo,
+                        zonedPreviousStartTime,
+                        zonedPreviousEndTime,
+                        zonedUpdatedStartTime,
+                        zonedUpdatedEndTime,
+                        zonedOccurredAt
+                    );
                 }
             );
     }
@@ -267,23 +219,12 @@ public class NotificationEventConverter {
                     scheduleInfo.getStartDatetime(), memberTimezone);
                 LocalDateTime zonedEndTime = TimeZoneConvertUtils.convertToZone(
                     scheduleInfo.getEndDatetime(), memberTimezone);
-                return MeetingCreateSseEvent.builder()
-                    .id(meetingCreateNotification.getId())
-                    .type(NotificationType.MEETING_CREATED)
-                    .receiverId(meetingCreateNotification.getReceiverId())
-                    .occurredAt(zonedOccurredAt)
-                    .isRead(meetingCreateNotification.getIsRead())
-                    .organizerId(scheduleInfo.getOrganizerId())
-                    .organizerName(scheduleInfo.getOrganizerName())
-                    .scheduleId(scheduleInfo.getScheduleId())
-                    .scheduleName(scheduleInfo.getName())
-                    .startTime(zonedStartTime)
-                    .endTime(zonedEndTime)
-                    .runningTime(scheduleInfo.getRunningTime())
-                    .receiverStatus(scheduleInfo.getReceiverStatus())
-                    .build();
+                return MeetingCreateSseEvent.convertFrom(
+                    meetingCreateNotification,
+                    scheduleInfo,
+                    zonedStartTime,
+                    zonedEndTime,
+                    zonedOccurredAt);
             });
     }
-
-
 }

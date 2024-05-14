@@ -2,6 +2,7 @@ package com.edgescheduler.notificationservice.client;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -11,14 +12,11 @@ public class UserServiceClient {
 
     private final WebClient webClient;
 
-    public UserServiceClient(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("http://user-service").build();
-    }
+    @Value("${webclient.user-service.url}")
+    private String userServiceUrl;
 
-    public Mono<String> getUncheck() {
-        return webClient.get()
-            .uri("/check")
-            .retrieve().bodyToMono(String.class);
+    public UserServiceClient(WebClient.Builder webClientBuilder) {
+        this.webClient = webClientBuilder.baseUrl(userServiceUrl).build();
     }
 
     public Mono<UserInfo> getUserInfo(Integer id) {
@@ -28,7 +26,7 @@ public class UserServiceClient {
             .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
                 response -> Mono.error(new RuntimeException("Failed to get user info")))
             .bodyToMono(UserInfo.class)
-            .onErrorResume(e -> Mono.just(
+            .onErrorResume(e -> Mono.just(  // 에러 발생 시 기본값 반환
                 UserInfo.builder()
                     .id(id)
                     .name("Unknown")

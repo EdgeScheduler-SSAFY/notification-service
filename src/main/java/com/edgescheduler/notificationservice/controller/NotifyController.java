@@ -2,7 +2,9 @@ package com.edgescheduler.notificationservice.controller;
 
 import com.edgescheduler.notificationservice.dto.NotificationHistory;
 import com.edgescheduler.notificationservice.dto.NotificationPage;
-import com.edgescheduler.notificationservice.event.NotificationSseEvent;
+import com.edgescheduler.notificationservice.dto.NotificationReadAllRequest;
+import com.edgescheduler.notificationservice.dto.NotificationReadAllResponse;
+import com.edgescheduler.notificationservice.dto.NotificationReadResponse;
 import com.edgescheduler.notificationservice.exception.ErrorCode;
 import com.edgescheduler.notificationservice.service.EventSinkManager;
 import com.edgescheduler.notificationservice.service.NotificationService;
@@ -19,7 +21,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
@@ -27,7 +28,6 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/notify")
 public class NotifyController {
 
     private static final Logger log = LoggerFactory.getLogger(NotifyController.class);
@@ -43,14 +43,15 @@ public class NotifyController {
                 if (eventSinkManager.addEventSink(memberId, sink, lastEventId)) {
                     sink.onDispose(() -> eventSinkManager.removeEventSink(memberId));
                 } else {
-                    sink.error(ErrorCode.DUPLICATE_CONNECTION.build());
+                    sink.error(ErrorCode.DUPLICATE_CONNECTION.exception());
                 }
             }
         ).onBackpressureBuffer();
     }
 
     @GetMapping("/notifications/history")
-    public Mono<NotificationHistory> getNotifications(@RequestHeader(name = "Authorization") Integer userId) {
+    public Mono<NotificationHistory> getNotifications(
+        @RequestHeader(name = "Authorization") Integer userId) {
         return notificationService.getNotificationsByReceiverIdWithin2Weeks(userId)
             .collectList().map(data -> NotificationHistory.builder().data(data).build());
     }
@@ -61,23 +62,28 @@ public class NotifyController {
         @RequestParam(name = "page", defaultValue = "0") Integer page,
         @RequestParam(name = "size", defaultValue = "5") Integer size) {
         log.info("getNotificationsPage: userId={}, page={}, size={}", userId, page, size);
-        return notificationService.getNotificationsByReceiverIdWithin2WeeksWithPaging(userId, page, size);
+        return notificationService.getNotificationsByReceiverIdWithin2WeeksWithPaging(userId, page,
+            size);
     }
 
-    @PatchMapping("/notifications/{id}/read")
-    public Mono<Map<String, Object>> readNotification(@PathVariable Long id) {
+    @PatchMapping("/notifications/read/{id}")
+    public Mono<NotificationReadResponse> readNotification(@PathVariable String id) {
         return notificationService.markAsRead(id)
-            .then(Mono.defer(
-                () -> Mono.just(Map.of("id", id, "status", "success"))));
+            .thenReturn(
+                NotificationReadResponse.builder().id(id).status("success").build()
+            );
     }
 
     @PostMapping("/notifications/read-all")
-    public Mono<Map<String, Object>> readAllNotifications(@RequestBody Map<String, List<Long>> body) {
-        List<Long> ids = body.get("ids");
-        if (ids == null || ids.isEmpty()) {
-            throw ErrorCode.REQUEST_VALIDATION.build("ids");
-        }
-        return notificationService.markAllAsRead(ids)
-            .then(Mono.just(Map.of("ids", ids, "status", "success")));
+    public Mono<NotificationReadAllResponse> readAllNotifications(@RequestBody
+    NotificationReadAllRequest readAllRequest) {
+        return Mono.justOrEmpty(readAllRequest.getIds())
+            .defaultIfEmpty(List.of())
+            .flatMap(ids -> ids.isEmpty() ?
+                Mono.error(ErrorCode.REQUEST_VALIDATION.exception("ids")) :
+                notificationService.markAllAsRead(ids))
+            .thenReturn(
+                NotificationReadAllResponse.builder().ids(readAllRequest.getIds()).status("success").build()
+            );
     }
 }

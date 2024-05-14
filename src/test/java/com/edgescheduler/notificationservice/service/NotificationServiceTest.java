@@ -32,7 +32,7 @@ class NotificationServiceTest {
     private MemberInfoRepository memberInfoRepository;
 
     @InjectMocks
-    private NotificationServiceImpl notificationService;
+    private NotificationService notificationService;
 
     @DisplayName("미팅 생성 메시지로 SSE 이벤트 생성")
     @Test

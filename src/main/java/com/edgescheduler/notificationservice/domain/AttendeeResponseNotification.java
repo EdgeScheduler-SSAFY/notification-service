@@ -1,6 +1,7 @@
 package com.edgescheduler.notificationservice.domain;
 
 import com.edgescheduler.notificationservice.event.Response;
+import com.edgescheduler.notificationservice.message.AttendeeResponseMessage;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -15,7 +16,14 @@ public class AttendeeResponseNotification extends Notification {
     private Integer attendeeId;
     private Response response;
 
-    // temporary
-//    private String scheduleName;
-//    private String attendeeName;
+    public static AttendeeResponseNotification from(AttendeeResponseMessage message) {
+        return AttendeeResponseNotification.builder()
+            .receiverId(message.getOrganizerId())
+            .occurredAt(message.getOccurredAt())
+            .isRead(false)
+            .scheduleId(message.getScheduleId())
+            .attendeeId(message.getAttendeeId())
+            .response(message.getResponse())
+            .build();
+    }
 }

@@ -41,6 +41,11 @@ spring:
       - optional:env.yml
 server:
   port: 8081
+webclient:
+  user-service:
+    url: http://user-service
+  schedule-service:
+    url: http://schedule-service
 ---
 spring:
   config:
