@@ -3,29 +3,24 @@ package com.edgescheduler.notificationservice.config.deserializer;
 import com.edgescheduler.notificationservice.exception.ErrorCode;
 import com.edgescheduler.notificationservice.message.AttendeeProposalMessage;
 import com.edgescheduler.notificationservice.message.AttendeeResponseMessage;
-import com.edgescheduler.notificationservice.message.NotificationMessage;
 import com.edgescheduler.notificationservice.message.MeetingCreateMessage;
 import com.edgescheduler.notificationservice.message.MeetingDeleteMessage;
 import com.edgescheduler.notificationservice.message.MeetingUpdateMessage;
+import com.edgescheduler.notificationservice.message.NotificationMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.header.Headers;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 @Slf4j
 public class NotificationMessageJsonDeserializer extends JsonDeserializer<NotificationMessage> {
 
-    @Value("${kafka.topic.meeting-created}")
     private String meetingCreatedTopic;
-    @Value("${kafka.topic.meeting-deleted}")
     private String meetingDeletedTopic;
-    @Value("${kafka.topic.meeting-updated}")
     private String meetingUpdatedTopic;
-    @Value("${kafka.topic.attendee-response}")
     private String attendeeResponseTopic;
-    @Value("${kafka.topic.attendee-proposal}")
     private String attendeeProposalTopic;
 
     public NotificationMessageJsonDeserializer() {
@@ -68,5 +63,15 @@ public class NotificationMessageJsonDeserializer extends JsonDeserializer<Notifi
             return AttendeeProposalMessage.class;
         }
         throw ErrorCode.KAFKA_TOPIC_NOT_FOUND.exception(topic);
+    }
+
+    @Override
+    public void configure(Map<String, ?> configs, boolean isKey) {
+        super.configure(configs, isKey);
+        meetingCreatedTopic = (String) configs.get("topic.meeting-created");
+        meetingDeletedTopic = (String) configs.get("topic.meeting-deleted");
+        meetingUpdatedTopic = (String) configs.get("topic.meeting-updated");
+        attendeeResponseTopic = (String) configs.get("topic.attendee-response");
+        attendeeProposalTopic = (String) configs.get("topic.attendee-proposal");
     }
 }
