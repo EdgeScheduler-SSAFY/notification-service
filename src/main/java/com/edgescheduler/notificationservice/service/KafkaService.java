@@ -37,7 +37,7 @@ public class KafkaService implements ApplicationRunner {
             .flatMapSequential(
                 record -> notificationService.saveNotificationFromEventMessage(record.value()))
             .flatMap(event ->
-//                Mono.zip(
+//                Mono.when(
 //                    eventSinkManager.sendEvent(event.getReceiverId(), event.getType().toString(),
 //                        event).subscribeOn(Schedulers.boundedElastic()),
 //                    emailService.sendEmail(event).subscribeOn(Schedulers.boundedElastic()))
