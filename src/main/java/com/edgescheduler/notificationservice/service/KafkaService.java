@@ -10,6 +10,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.kafka.core.reactive.ReactiveKafkaConsumerTemplate;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -35,7 +36,13 @@ public class KafkaService implements ApplicationRunner {
                 record -> log.info("Consumed message: {} | From partition: {} | From offset: {}",
                     record.value().getClass().getName(), record.partition(), record.offset()))
             .flatMapSequential(
-                record -> notificationService.saveNotificationFromEventMessage(record.value()))
+                record -> Flux.from(
+                    notificationService.saveNotificationFromEventMessage(record.value()))
+                    .onErrorResume(error -> {
+                        log.error("Error saving notification: {}", error.getMessage());
+                        return Mono.empty();
+                    })
+            )
             .flatMap(event ->
 //                Mono.when(
 //                    eventSinkManager.sendEvent(event.getReceiverId(), event.getType().toString(),
@@ -43,9 +50,11 @@ public class KafkaService implements ApplicationRunner {
 //                    emailService.sendEmail(event).subscribeOn(Schedulers.boundedElastic()))
                     eventSinkManager.sendEvent(event.getReceiverId(), event.getType().toString(),
                         event).subscribeOn(Schedulers.boundedElastic())
+                        .onErrorResume(error -> {
+                            log.error("Error sending event: {}", error.getMessage());
+                            return Mono.empty();
+                        })
             )
-            .doOnError(
-                error -> log.error("Error consuming notification message: {}", error.getMessage()))
             .subscribe();
 
         this.timeZoneQueue
