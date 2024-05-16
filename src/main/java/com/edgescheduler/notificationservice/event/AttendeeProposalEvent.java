@@ -8,11 +8,13 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.thymeleaf.context.Context;
+import reactor.core.publisher.Mono;
 
 @Getter
 @SuperBuilder
 @NoArgsConstructor
-public class AttendeeProposalSseEvent extends NotificationSseEvent {
+public class AttendeeProposalEvent extends NotificationEvent {
 
     private Integer attendeeId;
     private String attendeeName;
@@ -23,10 +25,10 @@ public class AttendeeProposalSseEvent extends NotificationSseEvent {
     private Integer runningTime;
     private String reason;
 
-    public static AttendeeProposalSseEvent from(
+    public static AttendeeProposalEvent from(
         AttendeeProposalMessage message,
         AttendeeProposalNotification notification) {
-        return AttendeeProposalSseEvent.builder()
+        return AttendeeProposalEvent.builder()
             .id(notification.getId())
             .type(NotificationType.ATTENDEE_PROPOSAL)
             .receiverId(notification.getReceiverId())
@@ -45,7 +47,7 @@ public class AttendeeProposalSseEvent extends NotificationSseEvent {
             .build();
     }
 
-    public static AttendeeProposalSseEvent convertFrom(
+    public static AttendeeProposalEvent convertFrom(
         AttendeeProposalNotification attendeeProposalNotification,
         ScheduleInfo scheduleInfo,
         UserInfo attendeeInfo,
@@ -53,7 +55,7 @@ public class AttendeeProposalSseEvent extends NotificationSseEvent {
         LocalDateTime zonedProposedEndTime,
         LocalDateTime zonedOccurredAt
     ) {
-        return AttendeeProposalSseEvent.builder()
+        return AttendeeProposalEvent.builder()
             .id(attendeeProposalNotification.getId())
             .type(NotificationType.ATTENDEE_PROPOSAL)
             .receiverId(attendeeProposalNotification.getReceiverId())
@@ -69,5 +71,24 @@ public class AttendeeProposalSseEvent extends NotificationSseEvent {
             .proposedEndTime(zonedProposedEndTime)
             .runningTime(attendeeProposalNotification.getRunningTime())
             .build();
+    }
+
+    @Override
+    public String getTemplateName() {
+        return "attendee-proposal";
+    }
+
+    @Override
+    public Mono<Context> emailContext() {
+        return Mono.fromCallable(() -> {
+            Context context = new Context();
+            context.setVariable("attendeeName", attendeeName);
+            context.setVariable("scheduleName", super.getScheduleName());
+            context.setVariable("startTime", startTime);
+            context.setVariable("endTime", endTime);
+            context.setVariable("proposedStartTime", proposedStartTime);
+            context.setVariable("proposedEndTime", proposedEndTime);
+            return context;
+        });
     }
 }

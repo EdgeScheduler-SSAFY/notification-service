@@ -1,6 +1,6 @@
 package com.edgescheduler.notificationservice.dto;
 
-import com.edgescheduler.notificationservice.event.NotificationSseEvent;
+import com.edgescheduler.notificationservice.event.NotificationEvent;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,5 +13,5 @@ public class NotificationPage {
     private Integer size;
     private Integer totalPages;
     private Integer totalElements;
-    private List<NotificationSseEvent> data;
+    private List<NotificationEvent> data;
 }

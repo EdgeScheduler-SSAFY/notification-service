@@ -8,11 +8,13 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.thymeleaf.context.Context;
+import reactor.core.publisher.Mono;
 
 @Getter
 @SuperBuilder
 @NoArgsConstructor
-public class AttendeeResponseSseEvent extends NotificationSseEvent {
+public class AttendeeResponseEvent extends NotificationEvent {
 
     private LocalDateTime startTime;
     private LocalDateTime endTime;
@@ -20,10 +22,10 @@ public class AttendeeResponseSseEvent extends NotificationSseEvent {
     private String attendeeName;
     private Response response;
 
-    public static AttendeeResponseSseEvent from(
+    public static AttendeeResponseEvent from(
         AttendeeResponseMessage message,
         AttendeeResponseNotification notification) {
-        return AttendeeResponseSseEvent.builder()
+        return AttendeeResponseEvent.builder()
             .id(notification.getId())
             .receiverId(notification.getReceiverId())
             .type(NotificationType.ATTENDEE_RESPONSE)
@@ -39,13 +41,13 @@ public class AttendeeResponseSseEvent extends NotificationSseEvent {
             .build();
     }
 
-    public static AttendeeResponseSseEvent convertFrom(
+    public static AttendeeResponseEvent convertFrom(
         AttendeeResponseNotification attendeeResponseNotification,
         ScheduleInfo scheduleInfo,
         UserInfo attendeeInfo,
         LocalDateTime zonedOccurredAt
     ) {
-        return AttendeeResponseSseEvent.builder()
+        return AttendeeResponseEvent.builder()
             .id(attendeeResponseNotification.getId())
             .type(NotificationType.ATTENDEE_RESPONSE)
             .receiverId(attendeeResponseNotification.getReceiverId())
@@ -59,5 +61,23 @@ public class AttendeeResponseSseEvent extends NotificationSseEvent {
             .attendeeName(attendeeInfo.getName())
             .response(attendeeResponseNotification.getResponse())
             .build();
+    }
+
+    @Override
+    public String getTemplateName() {
+        return "attendee-response";
+    }
+
+    @Override
+    public Mono<Context> emailContext() {
+        return Mono.fromCallable(() -> {
+            Context context = new Context();
+            context.setVariable("attendeeName", attendeeName);
+            context.setVariable("scheduleName", super.getScheduleName());
+            context.setVariable("startTime", startTime);
+            context.setVariable("endTime", endTime);
+            context.setVariable("response", response);
+            return context;
+        });
     }
 }

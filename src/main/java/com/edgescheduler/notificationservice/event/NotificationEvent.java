@@ -8,7 +8,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder
 @NoArgsConstructor
-public abstract class NotificationSseEvent {
+public abstract class NotificationEvent implements EmailContextHolder {
 
     private String id;
     private NotificationType type;

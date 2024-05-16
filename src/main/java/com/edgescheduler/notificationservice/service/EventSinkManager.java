@@ -1,6 +1,5 @@
 package com.edgescheduler.notificationservice.service;
 
-import com.edgescheduler.notificationservice.event.NotificationSseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

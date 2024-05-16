@@ -7,11 +7,13 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.thymeleaf.context.Context;
+import reactor.core.publisher.Mono;
 
 @Getter
 @SuperBuilder
 @NoArgsConstructor
-public class MeetingUpdateTimeSseEvent extends NotificationSseEvent {
+public class MeetingUpdateTimeEvent extends NotificationEvent {
 
     private Integer organizerId;
     private String organizerName;
@@ -22,10 +24,10 @@ public class MeetingUpdateTimeSseEvent extends NotificationSseEvent {
     private Integer runningTime;
     private AttendeeStatus receiverStatus;
 
-    public static MeetingUpdateTimeSseEvent from(
+    public static MeetingUpdateTimeEvent from(
         MeetingUpdateMessage message,
         MeetingUpdateTimeNotification notification) {
-        return MeetingUpdateTimeSseEvent.builder()
+        return MeetingUpdateTimeEvent.builder()
             .id(notification.getId())
             .receiverId(notification.getReceiverId())
             .type(NotificationType.MEETING_UPDATED_TIME)
@@ -44,7 +46,7 @@ public class MeetingUpdateTimeSseEvent extends NotificationSseEvent {
             .build();
     }
 
-    public static MeetingUpdateTimeSseEvent convertFrom(
+    public static MeetingUpdateTimeEvent convertFrom(
         MeetingUpdateTimeNotification meetingUpdateTimeNotification,
         ScheduleInfo scheduleInfo,
         LocalDateTime zonedPreviousStartTime,
@@ -53,7 +55,7 @@ public class MeetingUpdateTimeSseEvent extends NotificationSseEvent {
         LocalDateTime zonedUpdatedEndTime,
         LocalDateTime zonedOccurredAt
     ) {
-        return MeetingUpdateTimeSseEvent.builder()
+        return MeetingUpdateTimeEvent.builder()
             .id(meetingUpdateTimeNotification.getId())
             .type(NotificationType.MEETING_UPDATED_TIME)
             .receiverId(meetingUpdateTimeNotification.getReceiverId())
@@ -70,5 +72,24 @@ public class MeetingUpdateTimeSseEvent extends NotificationSseEvent {
             .runningTime(scheduleInfo.getRunningTime())
             .receiverStatus(scheduleInfo.getReceiverStatus())
             .build();
+    }
+
+    @Override
+    public String getTemplateName() {
+        return "meeting-update-time";
+    }
+
+    @Override
+    public Mono<Context> emailContext() {
+        return Mono.fromCallable(() -> {
+            Context context = new Context();
+            context.setVariable("organizerName", organizerName);
+            context.setVariable("scheduleName", super.getScheduleName());
+            context.setVariable("previousStartTime", previousStartTime);
+            context.setVariable("previousEndTime", previousEndTime);
+            context.setVariable("updatedStartTime", updatedStartTime);
+            context.setVariable("updatedEndTime", updatedEndTime);
+            return context;
+        });
     }
 }

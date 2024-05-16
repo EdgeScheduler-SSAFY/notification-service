@@ -34,11 +34,10 @@ public class NotifyController {
     private final EventSinkManager eventSinkManager;
     private final NotificationService notificationService;
 
-    @GetMapping(path = "/subscribe/{memberId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(path = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<Object>> sse(
-        @RequestHeader(name = "Authorization", required = false) Integer userId,
-        @RequestHeader(name = "Last-Event-ID", required = false, defaultValue = "0") Long lastEventId,
-        @PathVariable Integer memberId) {
+        @RequestHeader(name = "Authorization", required = false) Integer memberId,
+        @RequestHeader(name = "Last-Event-ID", required = false, defaultValue = "0") Long lastEventId) {
         return Flux.<ServerSentEvent<Object>>create(sink -> {
                 if (eventSinkManager.addEventSink(memberId, sink, lastEventId)) {
                     sink.onDispose(() -> eventSinkManager.removeEventSink(memberId));

@@ -8,11 +8,13 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.thymeleaf.context.Context;
+import reactor.core.publisher.Mono;
 
 @Getter
 @SuperBuilder
 @NoArgsConstructor
-public class MeetingDeleteSseEvent extends NotificationSseEvent {
+public class MeetingDeleteEvent extends NotificationEvent {
 
     private Integer organizerId;
     private String organizerName;
@@ -20,10 +22,10 @@ public class MeetingDeleteSseEvent extends NotificationSseEvent {
     private LocalDateTime endTime;
     private Integer runningTime;
 
-    public static MeetingDeleteSseEvent from(
+    public static MeetingDeleteEvent from(
         MeetingDeleteMessage message,
         MeetingDeleteNotification notification) {
-        return MeetingDeleteSseEvent.builder()
+        return MeetingDeleteEvent.builder()
             .id(notification.getId())
             .receiverId(notification.getReceiverId())
             .type(NotificationType.MEETING_DELETED)
@@ -38,10 +40,10 @@ public class MeetingDeleteSseEvent extends NotificationSseEvent {
             .build();
     }
 
-    public static MeetingDeleteSseEvent from(
+    public static MeetingDeleteEvent from(
         MeetingUpdateMessage message,
         MeetingDeleteNotification notification) {
-        return MeetingDeleteSseEvent.builder()
+        return MeetingDeleteEvent.builder()
             .id(notification.getId())
             .receiverId(notification.getReceiverId())
             .type(NotificationType.MEETING_DELETED)
@@ -56,12 +58,12 @@ public class MeetingDeleteSseEvent extends NotificationSseEvent {
             .build();
     }
 
-    public static MeetingDeleteSseEvent convertFrom(
+    public static MeetingDeleteEvent convertFrom(
         MeetingDeleteNotification meetingDeleteNotification,
         UserInfo organizerInfo,
         LocalDateTime zonedOccurredAt
     ) {
-        return MeetingDeleteSseEvent.builder()
+        return MeetingDeleteEvent.builder()
             .id(meetingDeleteNotification.getId())
             .type(NotificationType.MEETING_DELETED)
             .receiverId(meetingDeleteNotification.getReceiverId())
@@ -75,5 +77,22 @@ public class MeetingDeleteSseEvent extends NotificationSseEvent {
             .endTime(meetingDeleteNotification.getEndTime())
             .runningTime(meetingDeleteNotification.getRunningTime())
             .build();
+    }
+
+    @Override
+    public String getTemplateName() {
+        return "meeting-delete";
+    }
+
+    @Override
+    public Mono<Context> emailContext() {
+        return Mono.fromCallable(() -> {
+            Context context = new Context();
+            context.setVariable("organizerName", organizerName);
+            context.setVariable("scheduleName", super.getScheduleName());
+            context.setVariable("startTime", startTime);
+            context.setVariable("endTime", endTime);
+            return context;
+        });
     }
 }
