@@ -24,6 +24,7 @@ public class UserServiceClient {
     }
 
     public Mono<UserInfo> getUserInfo(Integer id) {
+        log.info("userServiceUrl: {}", userServiceUrl);
         return webClient.get()
             .uri("/members/{id}", id)
             .retrieve()
