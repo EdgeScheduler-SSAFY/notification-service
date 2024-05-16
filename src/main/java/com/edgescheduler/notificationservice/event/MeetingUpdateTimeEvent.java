@@ -3,6 +3,7 @@ package com.edgescheduler.notificationservice.event;
 import com.edgescheduler.notificationservice.client.ScheduleServiceClient.ScheduleInfo;
 import com.edgescheduler.notificationservice.domain.MeetingUpdateTimeNotification;
 import com.edgescheduler.notificationservice.message.MeetingUpdateMessage;
+import com.edgescheduler.notificationservice.util.TimeStringUtils;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -84,11 +85,9 @@ public class MeetingUpdateTimeEvent extends NotificationEvent {
         return Mono.fromCallable(() -> {
             Context context = new Context();
             context.setVariable("organizerName", organizerName);
-            context.setVariable("scheduleName", super.getScheduleName());
-            context.setVariable("previousStartTime", previousStartTime);
-            context.setVariable("previousEndTime", previousEndTime);
-            context.setVariable("updatedStartTime", updatedStartTime);
-            context.setVariable("updatedEndTime", updatedEndTime);
+            context.setVariable("title", super.getScheduleName());
+            context.setVariable("before", TimeStringUtils.formatPeriod(previousStartTime, previousEndTime));
+            context.setVariable("updated", TimeStringUtils.formatPeriod(updatedStartTime, updatedEndTime));
             return context;
         });
     }

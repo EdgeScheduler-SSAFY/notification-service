@@ -3,8 +3,10 @@ package com.edgescheduler.notificationservice.event;
 import com.edgescheduler.notificationservice.client.ScheduleServiceClient.ScheduleInfo;
 import com.edgescheduler.notificationservice.domain.MeetingUpdateNotTimeNotification;
 import com.edgescheduler.notificationservice.message.MeetingUpdateMessage;
+import com.edgescheduler.notificationservice.util.TimeStringUtils;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -77,10 +79,11 @@ public class MeetingUpdateFieldsEvent extends NotificationEvent {
         return Mono.fromCallable(() -> {
             Context context = new Context();
             context.setVariable("organizerName", organizerName);
-            context.setVariable("scheduleName", super.getScheduleName());
-            context.setVariable("startTime", startTime);
-            context.setVariable("endTime", endTime);
-            context.setVariable("updatedFields", updatedFields);
+            context.setVariable("title", super.getScheduleName());
+            context.setVariable("date", TimeStringUtils.formatPeriod(startTime, endTime));
+            context.setVariable("updatedFields",
+                updatedFields.stream().map(UpdatedField::name)
+                    .collect(Collectors.joining(", ", "[ ", " ]")));
             return context;
         });
     }

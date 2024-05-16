@@ -4,6 +4,7 @@ import com.edgescheduler.notificationservice.client.UserServiceClient.UserInfo;
 import com.edgescheduler.notificationservice.domain.MeetingDeleteNotification;
 import com.edgescheduler.notificationservice.message.MeetingDeleteMessage;
 import com.edgescheduler.notificationservice.message.MeetingUpdateMessage;
+import com.edgescheduler.notificationservice.util.TimeStringUtils;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -89,9 +90,8 @@ public class MeetingDeleteEvent extends NotificationEvent {
         return Mono.fromCallable(() -> {
             Context context = new Context();
             context.setVariable("organizerName", organizerName);
-            context.setVariable("scheduleName", super.getScheduleName());
-            context.setVariable("startTime", startTime);
-            context.setVariable("endTime", endTime);
+            context.setVariable("title", super.getScheduleName());
+            context.setVariable("date", TimeStringUtils.formatPeriod(startTime, endTime));
             return context;
         });
     }

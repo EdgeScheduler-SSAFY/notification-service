@@ -5,6 +5,7 @@ import com.edgescheduler.notificationservice.domain.MeetingCreateNotification;
 import com.edgescheduler.notificationservice.exception.ErrorCode;
 import com.edgescheduler.notificationservice.message.MeetingCreateMessage;
 import com.edgescheduler.notificationservice.message.MeetingUpdateMessage;
+import com.edgescheduler.notificationservice.util.TimeStringUtils;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.time.LocalDateTime;
@@ -102,9 +103,8 @@ public class MeetingCreateEvent extends NotificationEvent {
         return Mono.fromCallable(() -> {
             Context context = new Context();
             context.setVariable("organizerName", organizerName);
-            context.setVariable("scheduleName", super.getScheduleName());
-            context.setVariable("startTime", startTime);
-            context.setVariable("endTime", endTime);
+            context.setVariable("title", super.getScheduleName());
+            context.setVariable("date", TimeStringUtils.formatPeriod(startTime, endTime));
             return context;
         });
     }

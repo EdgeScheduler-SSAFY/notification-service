@@ -4,6 +4,7 @@ import com.edgescheduler.notificationservice.client.ScheduleServiceClient.Schedu
 import com.edgescheduler.notificationservice.client.UserServiceClient.UserInfo;
 import com.edgescheduler.notificationservice.domain.AttendeeProposalNotification;
 import com.edgescheduler.notificationservice.message.AttendeeProposalMessage;
+import com.edgescheduler.notificationservice.util.TimeStringUtils;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,7 @@ public class AttendeeProposalEvent extends NotificationEvent {
     private String attendeeName;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private Long proposalId;
     private LocalDateTime proposedStartTime;
     private LocalDateTime proposedEndTime;
     private Integer runningTime;
@@ -40,6 +42,7 @@ public class AttendeeProposalEvent extends NotificationEvent {
             .endTime(message.getEndTime())
             .attendeeId(notification.getAttendeeId())
             .attendeeName(message.getAttendeeName())
+            .proposalId(notification.getProposalId())
             .proposedStartTime(notification.getProposedStartTime())
             .proposedEndTime(notification.getProposedEndTime())
             .runningTime(notification.getRunningTime())
@@ -67,6 +70,7 @@ public class AttendeeProposalEvent extends NotificationEvent {
             .endTime(scheduleInfo.getEndDatetime())
             .attendeeId(attendeeProposalNotification.getAttendeeId())
             .attendeeName(attendeeInfo.getName())
+            .proposalId(attendeeProposalNotification.getProposalId())
             .proposedStartTime(zonedProposedStartTime)
             .proposedEndTime(zonedProposedEndTime)
             .runningTime(attendeeProposalNotification.getRunningTime())
@@ -83,11 +87,9 @@ public class AttendeeProposalEvent extends NotificationEvent {
         return Mono.fromCallable(() -> {
             Context context = new Context();
             context.setVariable("attendeeName", attendeeName);
-            context.setVariable("scheduleName", super.getScheduleName());
-            context.setVariable("startTime", startTime);
-            context.setVariable("endTime", endTime);
-            context.setVariable("proposedStartTime", proposedStartTime);
-            context.setVariable("proposedEndTime", proposedEndTime);
+            context.setVariable("title", super.getScheduleName());
+            context.setVariable("current", TimeStringUtils.formatPeriod(startTime, endTime));
+            context.setVariable("suggested", TimeStringUtils.formatPeriod(proposedStartTime, proposedEndTime));
             return context;
         });
     }

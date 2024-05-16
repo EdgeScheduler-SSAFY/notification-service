@@ -4,6 +4,7 @@ import com.edgescheduler.notificationservice.client.ScheduleServiceClient.Schedu
 import com.edgescheduler.notificationservice.client.UserServiceClient.UserInfo;
 import com.edgescheduler.notificationservice.domain.AttendeeResponseNotification;
 import com.edgescheduler.notificationservice.message.AttendeeResponseMessage;
+import com.edgescheduler.notificationservice.util.TimeStringUtils;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -73,10 +74,9 @@ public class AttendeeResponseEvent extends NotificationEvent {
         return Mono.fromCallable(() -> {
             Context context = new Context();
             context.setVariable("attendeeName", attendeeName);
-            context.setVariable("scheduleName", super.getScheduleName());
-            context.setVariable("startTime", startTime);
-            context.setVariable("endTime", endTime);
-            context.setVariable("response", response);
+            context.setVariable("title", super.getScheduleName());
+            context.setVariable("date", TimeStringUtils.formatPeriod(startTime, endTime));
+            context.setVariable("response", response.name().toLowerCase());
             return context;
         });
     }
