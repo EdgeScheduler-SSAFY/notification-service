@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -16,11 +16,8 @@ public class ScheduleServiceClient {
 
     private final WebClient webClient;
 
-    @Value("${webclient.schedule-service.url}")
-    private String scheduleServiceUrl;
-
-    public ScheduleServiceClient(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl(scheduleServiceUrl).build();
+    public ScheduleServiceClient(@Qualifier("scheduleServiceWebClient") WebClient webClient) {
+        this.webClient = webClient;
     }
 
     public Mono<ScheduleInfo> getSchedule(Long scheduleId, Integer receiverId) {

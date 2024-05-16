@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -16,15 +16,11 @@ public class UserServiceClient {
     private static final Logger log = LoggerFactory.getLogger(UserServiceClient.class);
     private final WebClient webClient;
 
-    @Value("${webclient.user-service.url}")
-    private String userServiceUrl;
-
-    public UserServiceClient(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl(userServiceUrl).build();
+    public UserServiceClient(@Qualifier("userServiceWebClient") WebClient webClient) {
+        this.webClient = webClient;
     }
 
     public Mono<UserInfo> getUserInfo(Integer id) {
-        log.info("userServiceUrl: {}", userServiceUrl);
         return webClient.get()
             .uri("/members/{id}", id)
             .retrieve()
