@@ -1,6 +1,7 @@
 package com.edgescheduler.notificationservice.client;
 
 import com.edgescheduler.notificationservice.event.AttendeeStatus;
+import com.edgescheduler.notificationservice.exception.ErrorCode;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,8 +30,9 @@ public class ScheduleServiceClient {
             .retrieve()
             .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
                 response -> {
-                    log.error("Failed to get schedule info");
-                    return Mono.error(new RuntimeException("Failed to get schedule info"));
+                    log.error("Failed to get schedule info: {}", response.statusCode());
+                    log.error("failed response body: {}", response.bodyToMono(String.class).block());
+                    return Mono.error(ErrorCode.SCHEDULE_NOT_FOUND.exception(scheduleId));
                 })
             .bodyToMono(ScheduleInfo.class)
             .onErrorResume(e -> Mono.just(      // 에러 발생 시 기본값 반환

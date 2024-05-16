@@ -11,7 +11,8 @@ public enum ErrorCode {
     MAIL_SEND_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "NS002", "Failed to send email"),
     MAIL_CREATE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "NS002", "Failed to create email"),
     REQUEST_VALIDATION(HttpStatus.BAD_REQUEST, "NS003", "Request validation failed: %s"),
-    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "NS004", "Member not found: %s"),
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "NS004", "Member not found: id = %d"),
+    SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "NS005", "Schedule not found: id = %d"),
     KAFKA_TOPIC_NOT_FOUND(HttpStatus.NOT_FOUND, "KAFKA001", "Kafka topic not found: %s");
 
     private final HttpStatus httpStatus;
