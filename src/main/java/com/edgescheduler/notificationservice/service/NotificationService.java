@@ -75,7 +75,8 @@ public class NotificationService {
                 attendeeIds.remove(message.getOrganizerId());
                 List<MeetingCreateNotification> notifications = attendeeIds.stream()
                     .map(
-                        attendeeId -> MeetingCreateNotification.from(attendeeId, meetingCreateMessage)
+                        attendeeId -> MeetingCreateNotification.from(attendeeId,
+                            meetingCreateMessage)
                     ).toList();
                 return notificationRepository.saveAll(notifications);
             })
@@ -98,31 +99,44 @@ public class NotificationService {
                             attendeeId -> MeetingCreateNotification.from(attendeeId, message)
                         ).toList()
                     ).flatMapMany(notificationRepository::saveAll)
-                    .map(notification -> MeetingCreateEvent.from(meetingUpdateMessage, notification));
+                    .map(notification -> MeetingCreateEvent.from(meetingUpdateMessage,
+                        notification));
 
-                Flux<NotificationEvent> removedEvents = Mono.just(
-                        removedAttendeeIds.stream().map(
-                            attendeeId -> MeetingDeleteNotification.from(attendeeId, meetingUpdateMessage)
-                        ).toList()
-                    ).flatMapMany(notificationRepository::saveAll)
-                    .map(notification -> MeetingDeleteEvent.from(meetingUpdateMessage, notification));
+                Flux<NotificationEvent> removedEvents =
+                    Flux.fromIterable(removedAttendeeIds)
+                        .flatMap(
+                            attendeeId -> notificationRepository.deleteByReceiverIdAndScheduleId(
+                                attendeeId, meetingUpdateMessage.getScheduleId())
+                        ).then(Mono.just(
+                            removedAttendeeIds.stream().map(
+                                attendeeId -> MeetingDeleteNotification.from(attendeeId,
+                                    meetingUpdateMessage)
+                            ).toList()
+                        ))
+                        .flatMapMany(notificationRepository::saveAll)
+                        .map(notification -> MeetingDeleteEvent.from(meetingUpdateMessage,
+                            notification));
 
                 Flux<NotificationEvent> updatedEvents = Mono.just(
                         maintainedAttendeeIds.stream().map(
-                            attendeeId -> MeetingUpdateNotTimeNotification.from(attendeeId, meetingUpdateMessage)
+                            attendeeId -> MeetingUpdateNotTimeNotification.from(attendeeId,
+                                meetingUpdateMessage)
                         ).toList()
                     ).flatMapMany(notificationRepository::saveAll)
-                    .map(notification -> MeetingUpdateFieldsEvent.from(meetingUpdateMessage, notification));
+                    .map(notification -> MeetingUpdateFieldsEvent.from(meetingUpdateMessage,
+                        notification));
 
                 if (meetingUpdateMessage.getUpdatedFields().contains(UpdatedField.TIME)) {
                     updatedEvents = Flux.mergeSequential(
                         updatedEvents,
                         Mono.just(
                                 maintainedAttendeeIds.stream().map(
-                                    attendeeId -> MeetingUpdateTimeNotification.from(attendeeId, meetingUpdateMessage)
+                                    attendeeId -> MeetingUpdateTimeNotification.from(attendeeId,
+                                        meetingUpdateMessage)
                                 ).toList()
                             ).flatMapMany(notificationRepository::saveAll)
-                            .map(notification -> MeetingUpdateTimeEvent.from(meetingUpdateMessage, notification))
+                            .map(notification -> MeetingUpdateTimeEvent.from(meetingUpdateMessage,
+                                notification))
                     );
                 }
 
@@ -140,7 +154,8 @@ public class NotificationService {
                 attendeeIds.remove(message.getOrganizerId());
                 List<MeetingDeleteNotification> notifications = attendeeIds.stream()
                     .map(
-                        attendeeId -> MeetingDeleteNotification.from(attendeeId, meetingDeleteMessage)
+                        attendeeId -> MeetingDeleteNotification.from(attendeeId,
+                            meetingDeleteMessage)
                     ).toList();
                 return notificationRepository.saveAll(notifications);
             }).map(notification -> MeetingDeleteEvent.from(meetingDeleteMessage, notification));

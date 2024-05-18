@@ -32,6 +32,7 @@ public class ScheduleServiceClient {
             .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
                 response -> {
                     log.error("Failed to get schedule info: {}", response.statusCode());
+                    log.error("scheduleId: {}", scheduleId);
                     return Mono.error(ErrorCode.SCHEDULE_NOT_FOUND.exception(scheduleId));
                 })
             .bodyToMono(ScheduleInfo.class)

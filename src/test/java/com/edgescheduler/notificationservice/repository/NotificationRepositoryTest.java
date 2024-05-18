@@ -180,7 +180,7 @@ class NotificationRepositoryTest {
 
 
         Flux<Notification> notificationFlux = notificationRepository.saveAll(
-            Flux.just(not1, not2, not3, not4, not5, not6));
+            Flux.just(not3, not2, not5, not6, not4, not1));
         List<Notification> block = notificationFlux.collectList().block();
 
         var page1 = notificationRepository.findNotificationsAfterWithPaging(1, now.minusMinutes(6),
@@ -323,6 +323,70 @@ class NotificationRepositoryTest {
         assertNotNull(find);
         assertEquals(1, find.size());
         assertInstanceOf(AttendeeProposalNotification.class, find.get(0));
+    }
+
+    @Test
+    void deleteByReceiverIdAndScheduleIdTest() {
+        LocalDateTime now = LocalDateTime.now();
+        var not1 = MeetingCreateNotification.builder()
+            .receiverId(1)
+            .occurredAt(now)
+            .scheduleId(1L)
+            .build();
+
+        var not2 = AttendeeResponseNotification.builder()
+            .receiverId(1)
+            .occurredAt(now.minusMinutes(1))
+            .scheduleId(1L)
+            .attendeeId(2)
+            .response(Response.ACCEPTED)
+            .build();
+
+        var not3 = MeetingUpdateTimeNotification.builder()
+            .receiverId(1)
+            .occurredAt(now.minusMinutes(2))
+            .scheduleId(1L)
+            .previousStartTime(LocalDateTime.now())
+            .previousEndTime(LocalDateTime.now().plusMinutes(30))
+            .updatedStartTime(LocalDateTime.now().plusHours(1))
+            .updatedEndTime(LocalDateTime.now().plusHours(1).plusMinutes(30))
+            .build();
+
+        var not4 = MeetingUpdateNotTimeNotification.builder()
+            .receiverId(1)
+            .occurredAt(now.minusMinutes(3))
+            .scheduleId(3L)
+            .updatedFields(List.of(UpdatedField.TIME, UpdatedField.TITLE))
+            .build();
+
+        var not5 = MeetingDeleteNotification.builder()
+            .receiverId(1)
+            .occurredAt(now.minusMinutes(4))
+            .scheduleId(4L)
+            .scheduleName("Meeting 5")
+            .build();
+
+        var not6 = AttendeeProposalNotification.builder()
+            .receiverId(1)
+            .occurredAt(now.minusMinutes(5))
+            .scheduleId(6L)
+            .attendeeId(2)
+            .build();
+
+
+        Flux<Notification> notificationFlux = notificationRepository.saveAll(
+            Flux.just(not1, not2, not3, not4, not5, not6));
+        List<Notification> block = notificationFlux.collectList().block();
+
+        notificationRepository.deleteByReceiverIdAndScheduleId(1, 1L).block();
+
+        var find = notificationRepository.findNotificationsAfter(1, now.minusMinutes(6)).collectList().block();
+
+        assertNotNull(find);
+        assertEquals(3, find.size());
+        assertInstanceOf(MeetingUpdateNotTimeNotification.class, find.get(0));
+        assertInstanceOf(MeetingDeleteNotification.class, find.get(1));
+        assertInstanceOf(AttendeeProposalNotification.class, find.get(2));
     }
 
     @AfterEach

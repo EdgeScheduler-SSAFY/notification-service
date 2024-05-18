@@ -19,4 +19,6 @@ public interface NotificationRepository extends ReactiveMongoRepository<Notifica
     Mono<Long> countByReceiverIdAndOccurredAtGreaterThanEqual(Integer receiverId, LocalDateTime occurredAt);
 
     Mono<Void> deleteByScheduleId(Long scheduleId);
+
+    Mono<Void> deleteByReceiverIdAndScheduleId(Integer receiverId, Long scheduleId);
 }
