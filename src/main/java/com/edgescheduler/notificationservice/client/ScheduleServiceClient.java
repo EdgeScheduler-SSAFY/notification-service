@@ -35,30 +35,31 @@ public class ScheduleServiceClient {
                     return Mono.error(ErrorCode.SCHEDULE_NOT_FOUND.exception(scheduleId));
                 })
             .bodyToMono(ScheduleInfo.class)
-            .onErrorResume(e -> Mono.just(      // 에러 발생 시 기본값 반환
-                ScheduleInfo.builder()
-                    .scheduleId(scheduleId)
-                    .name("Unknown")
-                    .organizerId(0)
-                    .organizerName("Unknown")
-                    .startDatetime(LocalDateTime.now())
-                    .endDatetime(LocalDateTime.now().plusHours(2))
-                    .runningTime(120)
-                    .receiverStatus(AttendeeStatus.PENDING)
-                    .build()
-            ))
-            .switchIfEmpty(Mono.just(      // for stubbing
-                ScheduleInfo.builder()
-                    .scheduleId(scheduleId)
-                    .name("Unknown")
-                    .organizerId(0)
-                    .organizerName("Unknown")
-                    .startDatetime(LocalDateTime.now())
-                    .endDatetime(LocalDateTime.now().plusHours(2))
-                    .runningTime(120)
-                    .receiverStatus(AttendeeStatus.PENDING)
-                    .build()
-            ))
+            .filter(scheduleInfo -> !scheduleInfo.getIsDeleted())
+//            .onErrorResume(e -> Mono.just(      // 에러 발생 시 기본값 반환
+//                ScheduleInfo.builder()
+//                    .scheduleId(scheduleId)
+//                    .name("Unknown")
+//                    .organizerId(0)
+//                    .organizerName("Unknown")
+//                    .startDatetime(LocalDateTime.now())
+//                    .endDatetime(LocalDateTime.now().plusHours(2))
+//                    .runningTime(120)
+//                    .receiverStatus(AttendeeStatus.PENDING)
+//                    .build()
+//            ))
+//            .switchIfEmpty(Mono.just(      // for stubbing
+//                ScheduleInfo.builder()
+//                    .scheduleId(scheduleId)
+//                    .name("Unknown")
+//                    .organizerId(0)
+//                    .organizerName("Unknown")
+//                    .startDatetime(LocalDateTime.now())
+//                    .endDatetime(LocalDateTime.now().plusHours(2))
+//                    .runningTime(120)
+//                    .receiverStatus(AttendeeStatus.PENDING)
+//                    .build()
+//            ))
             ;
     }
 
@@ -73,5 +74,6 @@ public class ScheduleServiceClient {
         private LocalDateTime endDatetime;
         private Integer runningTime;
         private AttendeeStatus receiverStatus;
+        private Boolean isDeleted;
     }
 }

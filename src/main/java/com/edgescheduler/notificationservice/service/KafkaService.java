@@ -37,7 +37,7 @@ public class KafkaService implements ApplicationRunner {
                     record.value().getClass().getName(), record.partition(), record.offset()))
             .flatMapSequential(
                 record -> Flux.from(
-                    notificationService.saveNotificationFromEventMessage(record.value()))
+                        notificationService.saveNotificationFromEventMessage(record.value()))
                     .onErrorResume(error -> {
                         log.error("Error saving notification: {}", error.getMessage());
                         return Mono.empty();
@@ -49,7 +49,7 @@ public class KafkaService implements ApplicationRunner {
 //                        event).subscribeOn(Schedulers.boundedElastic()),
 //                    emailService.sendEmail(event).subscribeOn(Schedulers.boundedElastic()))
                     eventSinkManager.sendEvent(event.getReceiverId(), event.getType().toString(),
-                        event).subscribeOn(Schedulers.boundedElastic())
+                            event).subscribeOn(Schedulers.boundedElastic())
                         .onErrorResume(error -> {
                             log.error("Error sending event: {}", error.getMessage());
                             return Mono.empty();
