@@ -39,6 +39,7 @@ public class ScheduleServiceClient {
                 log.info("scheduleInfo: {}", scheduleInfo);
                 return !scheduleInfo.getIsDeleted();
             })
+            .onErrorResume(e -> Mono.empty())
 //            .onErrorResume(e -> Mono.just(      // 에러 발생 시 기본값 반환
 //                ScheduleInfo.builder()
 //                    .scheduleId(scheduleId)
