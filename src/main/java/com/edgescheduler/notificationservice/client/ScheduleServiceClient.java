@@ -5,6 +5,7 @@ import com.edgescheduler.notificationservice.exception.ErrorCode;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,10 @@ public class ScheduleServiceClient {
                     return Mono.error(ErrorCode.SCHEDULE_NOT_FOUND.exception(scheduleId));
                 })
             .bodyToMono(ScheduleInfo.class)
-            .filter(scheduleInfo -> !scheduleInfo.getIsDeleted())
+            .filter(scheduleInfo -> {
+                log.info("scheduleInfo: {}", scheduleInfo);
+                return !scheduleInfo.getIsDeleted();
+            })
 //            .onErrorResume(e -> Mono.just(      // 에러 발생 시 기본값 반환
 //                ScheduleInfo.builder()
 //                    .scheduleId(scheduleId)
@@ -65,6 +69,7 @@ public class ScheduleServiceClient {
 
     @Getter
     @Builder
+    @ToString
     public static class ScheduleInfo {
         private Long scheduleId;
         private String name;
