@@ -12,7 +12,6 @@ import org.springframework.data.annotation.TypeAlias;
 @NoArgsConstructor
 @TypeAlias("meetingCreate")
 public class MeetingCreateNotification extends Notification {
-    private Long scheduleId;
 
     public static MeetingCreateNotification from(Integer attendeeId, MeetingCreateMessage message) {
         return MeetingCreateNotification.builder()

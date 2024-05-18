@@ -24,6 +24,8 @@ public class Notification {
 
     private Boolean isRead;
 
+    private Long scheduleId;
+
     @Indexed(direction = IndexDirection.DESCENDING)
     private LocalDateTime occurredAt;
 }

@@ -12,7 +12,7 @@ import org.springframework.data.annotation.TypeAlias;
 @NoArgsConstructor
 @TypeAlias("meetingUpdateTime")
 public class MeetingUpdateTimeNotification extends Notification {
-    private Long scheduleId;
+
     private LocalDateTime previousStartTime;
     private LocalDateTime previousEndTime;
     private LocalDateTime updatedStartTime;

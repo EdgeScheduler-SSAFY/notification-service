@@ -17,4 +17,6 @@ public interface NotificationRepository extends ReactiveMongoRepository<Notifica
     Flux<Notification> findNotificationsAfterWithPaging(Integer receiverId, LocalDateTime occurredAt, Pageable pageable);
 
     Mono<Long> countByReceiverIdAndOccurredAtGreaterThanEqual(Integer receiverId, LocalDateTime occurredAt);
+
+    Mono<Void> deleteByScheduleId(Long scheduleId);
 }

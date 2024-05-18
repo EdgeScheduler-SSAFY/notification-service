@@ -12,7 +12,7 @@ import org.springframework.data.annotation.TypeAlias;
 @NoArgsConstructor
 @TypeAlias("attendeeProposal")
 public class AttendeeProposalNotification extends Notification {
-    private Long scheduleId;
+
     private Integer attendeeId;
     private Long proposalId;
     private LocalDateTime proposedStartTime;

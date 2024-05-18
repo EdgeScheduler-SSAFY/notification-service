@@ -133,6 +133,8 @@ public class NotificationService {
     private Flux<NotificationEvent> saveAndGetMeetingDeleteEvent(MeetingDeleteMessage
         meetingDeleteMessage) {
         return Mono.just(meetingDeleteMessage)
+            .flatMap(message -> notificationRepository.deleteByScheduleId(message.getScheduleId())
+                .thenReturn(message))
             .flatMapMany(message -> {
                 List<Integer> attendeeIds = message.getAttendeeIds();
                 attendeeIds.remove(message.getOrganizerId());
