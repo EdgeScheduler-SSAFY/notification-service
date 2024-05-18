@@ -104,6 +104,9 @@ public class MeetingCreateEvent extends NotificationEvent {
             Context context = new Context();
             context.setVariable("organizerName", organizerName);
             context.setVariable("title", super.getScheduleName());
+            context.setVariable("month", TimeStringUtils.getShortMonthString(startTime));
+            context.setVariable("dayOfMonth", startTime.getDayOfMonth());
+            context.setVariable("dayOfWeek", TimeStringUtils.getDayOfWeekString(startTime));
             context.setVariable("date", TimeStringUtils.formatPeriod(startTime, endTime));
             return context;
         });

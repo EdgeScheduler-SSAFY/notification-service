@@ -66,7 +66,7 @@ public class AttendeeResponseEvent extends NotificationEvent {
 
     @Override
     public String getTemplateName() {
-        return "attendee-response";
+        return response == Response.ACCEPTED ? "attendee-response-accepted" : "attendee-response-declined";
     }
 
     @Override
@@ -75,8 +75,10 @@ public class AttendeeResponseEvent extends NotificationEvent {
             Context context = new Context();
             context.setVariable("attendeeName", attendeeName);
             context.setVariable("title", super.getScheduleName());
+            context.setVariable("month", TimeStringUtils.getShortMonthString(startTime));
+            context.setVariable("dayOfMonth", startTime.getDayOfMonth());
+            context.setVariable("dayOfWeek", TimeStringUtils.getDayOfWeekString(startTime));
             context.setVariable("date", TimeStringUtils.formatPeriod(startTime, endTime));
-            context.setVariable("response", response.name().toLowerCase());
             return context;
         });
     }

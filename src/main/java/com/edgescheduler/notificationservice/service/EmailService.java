@@ -22,9 +22,11 @@ public class EmailService {
     private final EmailTemplateCreator emailTemplateCreator;
 
     public Mono<Void> sendEmail(NotificationEvent event) {
-        return memberInfoRepository.findById(event.getReceiverId())
-            .flatMap(memberInfo -> send(
-                memberInfo.getEmail(), event.getReceiverId() + "번 유저에게.", event));
+//        return memberInfoRepository.findById(event.getReceiverId())
+//            .flatMap(memberInfo -> send(
+//                memberInfo.getEmail(), event.getReceiverId() + "번 유저에게.", event));
+        return send(
+            "oh052679@naver.com", event.getReceiverId() + "번 유저에게.", event);
     }
 
     public Mono<Void> send(String to, String subject, NotificationEvent event) {

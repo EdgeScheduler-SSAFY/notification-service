@@ -88,6 +88,9 @@ public class AttendeeProposalEvent extends NotificationEvent {
             Context context = new Context();
             context.setVariable("attendeeName", attendeeName);
             context.setVariable("title", super.getScheduleName());
+            context.setVariable("month", TimeStringUtils.getShortMonthString(startTime));
+            context.setVariable("dayOfMonth", startTime.getDayOfMonth());
+            context.setVariable("dayOfWeek", TimeStringUtils.getDayOfWeekString(startTime));
             context.setVariable("current", TimeStringUtils.formatPeriod(startTime, endTime));
             context.setVariable("suggested", TimeStringUtils.formatPeriod(proposedStartTime, proposedEndTime));
             return context;

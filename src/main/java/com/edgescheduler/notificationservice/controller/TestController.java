@@ -4,8 +4,20 @@ import com.edgescheduler.notificationservice.client.ScheduleServiceClient;
 import com.edgescheduler.notificationservice.client.ScheduleServiceClient.ScheduleInfo;
 import com.edgescheduler.notificationservice.client.UserServiceClient;
 import com.edgescheduler.notificationservice.client.UserServiceClient.UserInfo;
+import com.edgescheduler.notificationservice.event.AttendeeProposalEvent;
+import com.edgescheduler.notificationservice.event.AttendeeResponseEvent;
+import com.edgescheduler.notificationservice.event.AttendeeStatus;
+import com.edgescheduler.notificationservice.event.MeetingCreateEvent;
+import com.edgescheduler.notificationservice.event.MeetingDeleteEvent;
+import com.edgescheduler.notificationservice.event.MeetingUpdateFieldsEvent;
+import com.edgescheduler.notificationservice.event.MeetingUpdateTimeEvent;
+import com.edgescheduler.notificationservice.event.NotificationType;
+import com.edgescheduler.notificationservice.event.Response;
+import com.edgescheduler.notificationservice.event.UpdatedField;
 import com.edgescheduler.notificationservice.service.EmailService;
 import com.edgescheduler.notificationservice.service.KafkaTestService;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,11 +62,152 @@ public class TestController {
         return kafkaService.publishAttendeeProposalEvent();
     }
 
-//    @PostMapping("/send-email")
-//    public Mono<String> test5(){
-//        return emailService.send("oh052679@naver.com", "해치웠나?", "제발...!")
-//            .flatMap(mimeMessage -> Mono.just("Email sent"));
-//    }
+    @PostMapping("/send-email/create")
+    public Mono<String> test5(){
+        MeetingCreateEvent createEvent = MeetingCreateEvent.builder()
+            .id("test")
+            .type(NotificationType.MEETING_CREATED)
+            .receiverId(8)
+            .occurredAt(LocalDateTime.now())
+            .isRead(false)
+            .organizerId(1)
+            .organizerName("test")
+            .scheduleId(2L)
+            .scheduleName("미팅 생성 이메일 테스트")
+            .startTime(LocalDateTime.now())
+            .endTime(LocalDateTime.now().plusHours(1))
+            .runningTime(60)
+            .receiverStatus(AttendeeStatus.PENDING)
+            .build();
+        return emailService.sendEmail(createEvent)
+            .thenReturn("success");
+    }
+
+    @PostMapping("/send-email/delete")
+    public Mono<String> test9(){
+        MeetingDeleteEvent deleteEvent = MeetingDeleteEvent.builder()
+            .id("test")
+            .type(NotificationType.MEETING_DELETED)
+            .receiverId(8)
+            .occurredAt(LocalDateTime.now())
+            .isRead(false)
+            .organizerId(1)
+            .organizerName("test")
+            .scheduleId(2L)
+            .scheduleName("미팅 삭제 이메일 테스트")
+            .startTime(LocalDateTime.now())
+            .endTime(LocalDateTime.now().plusHours(1))
+            .runningTime(60)
+            .build();
+        return emailService.sendEmail(deleteEvent)
+            .thenReturn("success");
+    }
+
+    @PostMapping("/send-email/update-fields")
+    public Mono<String> test10(){
+        MeetingUpdateFieldsEvent updateFieldsEvent = MeetingUpdateFieldsEvent.builder()
+            .id("test")
+            .type(NotificationType.MEETING_UPDATED_FIELDS)
+            .receiverId(8)
+            .occurredAt(LocalDateTime.now())
+            .isRead(false)
+            .organizerId(1)
+            .organizerName("test")
+            .scheduleId(2L)
+            .scheduleName("미팅 수정 이메일 테스트")
+            .startTime(LocalDateTime.now())
+            .endTime(LocalDateTime.now().plusHours(1))
+            .runningTime(60)
+            .updatedFields(List.of(UpdatedField.TIME, UpdatedField.TITLE, UpdatedField.DESCRIPTION))
+            .build();
+        return emailService.sendEmail(updateFieldsEvent)
+            .thenReturn("success");
+    }
+
+    @PostMapping("/send-email/update-time")
+    public Mono<String> test14(){
+        MeetingUpdateTimeEvent updateTimeEvent = MeetingUpdateTimeEvent.builder()
+            .id("test")
+            .type(NotificationType.MEETING_UPDATED_TIME)
+            .receiverId(8)
+            .occurredAt(LocalDateTime.now())
+            .isRead(false)
+            .organizerId(1)
+            .organizerName("주최자 이름")
+            .scheduleId(2L)
+            .scheduleName("미팅 시간 변경 이메일 테스트")
+            .previousStartTime(LocalDateTime.now())
+            .previousEndTime(LocalDateTime.now().plusHours(1))
+            .runningTime(60)
+            .updatedStartTime(LocalDateTime.now().plusHours(1))
+            .updatedEndTime(LocalDateTime.now().plusHours(2))
+            .build();
+        return emailService.sendEmail(updateTimeEvent)
+            .thenReturn("success");
+    }
+
+    @PostMapping("/send-email/attendee-accept")
+    public Mono<String> test11(){
+        AttendeeResponseEvent attendeeResponseEvent = AttendeeResponseEvent.builder()
+            .id("test")
+            .type(NotificationType.ATTENDEE_RESPONSE)
+            .receiverId(8)
+            .occurredAt(LocalDateTime.now())
+            .attendeeId(1)
+            .attendeeName("attendee test name")
+            .isRead(false)
+            .scheduleId(2L)
+            .scheduleName("참석자 응답 이메일 테스트")
+            .startTime(LocalDateTime.now())
+            .endTime(LocalDateTime.now().plusHours(1))
+            .response(Response.ACCEPTED)
+            .build();
+        return emailService.sendEmail(attendeeResponseEvent)
+            .thenReturn("success");
+    }
+
+    @PostMapping("/send-email/attendee-decline")
+    public Mono<String> test12(){
+        AttendeeResponseEvent attendeeResponseEvent = AttendeeResponseEvent.builder()
+            .id("test")
+            .type(NotificationType.ATTENDEE_RESPONSE)
+            .receiverId(8)
+            .occurredAt(LocalDateTime.now())
+            .attendeeId(1)
+            .attendeeName("attendee test name")
+            .isRead(false)
+            .scheduleId(2L)
+            .scheduleName("참석자 응답 이메일 테스트")
+            .startTime(LocalDateTime.now())
+            .endTime(LocalDateTime.now().plusHours(1))
+            .response(Response.DECLINED)
+            .build();
+        return emailService.sendEmail(attendeeResponseEvent)
+            .thenReturn("success");
+    }
+
+    @PostMapping("/send-email/attendee-proposal")
+    public Mono<String> test13(){
+        AttendeeProposalEvent attendeeProposalEvent = AttendeeProposalEvent.builder()
+            .id("test")
+            .type(NotificationType.ATTENDEE_PROPOSAL)
+            .receiverId(8)
+            .occurredAt(LocalDateTime.now())
+            .isRead(false)
+            .attendeeId(1)
+            .attendeeName("attendee decline name")
+            .scheduleId(2L)
+            .scheduleName("참석자 제안 이메일 테스트")
+            .startTime(LocalDateTime.now())
+            .endTime(LocalDateTime.now().plusHours(1))
+            .runningTime(60)
+            .proposedStartTime(LocalDateTime.now().plusHours(1))
+            .proposedEndTime(LocalDateTime.now().plusHours(2))
+            .reason("참석자 제안 이유")
+            .build();
+        return emailService.sendEmail(attendeeProposalEvent)
+            .thenReturn("success");
+    }
 
     @GetMapping("/user-service/{id}")
     public Mono<UserInfo> test6(@PathVariable Integer id){

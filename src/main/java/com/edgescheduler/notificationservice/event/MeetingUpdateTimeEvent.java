@@ -86,6 +86,9 @@ public class MeetingUpdateTimeEvent extends NotificationEvent {
             Context context = new Context();
             context.setVariable("organizerName", organizerName);
             context.setVariable("title", super.getScheduleName());
+            context.setVariable("month", TimeStringUtils.getShortMonthString(updatedStartTime));
+            context.setVariable("dayOfMonth", updatedStartTime.getDayOfMonth());
+            context.setVariable("dayOfWeek", TimeStringUtils.getDayOfWeekString(updatedStartTime));
             context.setVariable("before", TimeStringUtils.formatPeriod(previousStartTime, previousEndTime));
             context.setVariable("updated", TimeStringUtils.formatPeriod(updatedStartTime, updatedEndTime));
             return context;
