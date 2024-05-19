@@ -74,7 +74,9 @@ public class MeetingDeleteEvent extends NotificationEvent {
     public static MeetingDeleteEvent convertFrom(
         MeetingDeleteNotification meetingDeleteNotification,
         UserInfo organizerInfo,
-        LocalDateTime zonedOccurredAt
+        LocalDateTime zonedOccurredAt,
+        LocalDateTime zonedStartTime,
+        LocalDateTime zonedEndTime
     ) {
         return MeetingDeleteEvent.builder()
             .id(meetingDeleteNotification.getId())
@@ -86,8 +88,8 @@ public class MeetingDeleteEvent extends NotificationEvent {
             .organizerName(organizerInfo.getName())
             .scheduleId(meetingDeleteNotification.getScheduleId())
             .scheduleName(meetingDeleteNotification.getScheduleName())
-            .startTime(meetingDeleteNotification.getStartTime())
-            .endTime(meetingDeleteNotification.getEndTime())
+            .startTime(zonedStartTime)
+            .endTime(zonedEndTime)
             .runningTime(meetingDeleteNotification.getRunningTime())
             .build();
     }

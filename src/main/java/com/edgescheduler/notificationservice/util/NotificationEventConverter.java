@@ -106,11 +106,17 @@ public class NotificationEventConverter {
                 var attendeeInfo = tuple.getT3();
                 LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(
                     attendeeResponseNotification.getOccurredAt(), memberTimezone);
+                LocalDateTime zonedStartTime = TimeZoneConvertUtils.convertToZone(
+                    scheduleInfo.getStartDatetime(), memberTimezone);
+                LocalDateTime zonedEndTime = TimeZoneConvertUtils.convertToZone(
+                    scheduleInfo.getEndDatetime(), memberTimezone);
                 return AttendeeResponseEvent.convertFrom(
                     attendeeResponseNotification,
                     scheduleInfo,
                     attendeeInfo,
-                    zonedOccurredAt);
+                    zonedOccurredAt,
+                    zonedStartTime,
+                    zonedEndTime);
             });
     }
 
@@ -127,10 +133,16 @@ public class NotificationEventConverter {
                 var organizerInfo = tuple.getT2();
                 LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(
                     meetingDeleteNotification.getOccurredAt(), memberTimezone);
+                LocalDateTime zonedStartTime = TimeZoneConvertUtils.convertToZone(
+                    meetingDeleteNotification.getStartTime(), memberTimezone);
+                LocalDateTime zonedEndTime = TimeZoneConvertUtils.convertToZone(
+                    meetingDeleteNotification.getEndTime(), memberTimezone);
                 return MeetingDeleteEvent.convertFrom(
                     meetingDeleteNotification,
                     organizerInfo,
-                    zonedOccurredAt);
+                    zonedOccurredAt,
+                    zonedStartTime,
+                    zonedEndTime);
             });
     }
 

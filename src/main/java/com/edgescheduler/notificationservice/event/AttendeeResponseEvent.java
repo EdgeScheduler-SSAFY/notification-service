@@ -52,7 +52,9 @@ public class AttendeeResponseEvent extends NotificationEvent {
         AttendeeResponseNotification attendeeResponseNotification,
         ScheduleInfo scheduleInfo,
         UserInfo attendeeInfo,
-        LocalDateTime zonedOccurredAt
+        LocalDateTime zonedOccurredAt,
+        LocalDateTime zonedStartTime,
+        LocalDateTime zonedEndTime
     ) {
         return AttendeeResponseEvent.builder()
             .id(attendeeResponseNotification.getId())
@@ -62,8 +64,8 @@ public class AttendeeResponseEvent extends NotificationEvent {
             .isRead(attendeeResponseNotification.getIsRead())
             .scheduleId(scheduleInfo.getScheduleId())
             .scheduleName(scheduleInfo.getName())
-            .startTime(scheduleInfo.getStartDatetime())
-            .endTime(scheduleInfo.getEndDatetime())
+            .startTime(zonedStartTime)
+            .endTime(zonedEndTime)
             .attendeeId(attendeeResponseNotification.getAttendeeId())
             .attendeeName(attendeeInfo.getName())
             .response(attendeeResponseNotification.getResponse())
