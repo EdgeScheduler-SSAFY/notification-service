@@ -47,13 +47,15 @@ public class KafkaService implements ApplicationRunner {
                 Mono.when(
                     eventSinkManager.sendEvent(event.getReceiverId(), event.getType().toString(),
                         event).subscribeOn(Schedulers.boundedElastic()),
-                    emailService.sendEmail(event).subscribeOn(Schedulers.boundedElastic()))
-//                    eventSinkManager.sendEvent(event.getReceiverId(), event.getType().toString(),
-//                            event).subscribeOn(Schedulers.boundedElastic())
+                    emailService.sendEmail(event).subscribeOn(Schedulers.boundedElastic())
                         .onErrorResume(error -> {
                             log.error("Error sending event: {}", error.getMessage());
                             return Mono.empty();
                         })
+                )
+//                    eventSinkManager.sendEvent(event.getReceiverId(), event.getType().toString(),
+//                            event).subscribeOn(Schedulers.boundedElastic())
+
             )
             .subscribe();
 
