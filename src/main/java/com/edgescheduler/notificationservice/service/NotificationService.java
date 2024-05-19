@@ -255,7 +255,7 @@ public class NotificationService {
                 Integer total = Math.toIntExact(tuple.getT2());
                 return NotificationPage.builder()
                     .page(page)
-                    .size(size)
+                    .size(data.size())
                     .totalPages((total + size - 1) / size)
                     .totalElements(total)
                     .data(data)
