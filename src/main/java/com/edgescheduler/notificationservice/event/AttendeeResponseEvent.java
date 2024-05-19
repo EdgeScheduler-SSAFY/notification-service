@@ -5,7 +5,9 @@ import com.edgescheduler.notificationservice.client.UserServiceClient.UserInfo;
 import com.edgescheduler.notificationservice.domain.AttendeeResponseNotification;
 import com.edgescheduler.notificationservice.message.AttendeeResponseMessage;
 import com.edgescheduler.notificationservice.util.TimeStringUtils;
+import com.edgescheduler.notificationservice.util.TimeZoneConvertUtils;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -25,16 +27,20 @@ public class AttendeeResponseEvent extends NotificationEvent {
 
     public static AttendeeResponseEvent from(
         AttendeeResponseMessage message,
-        AttendeeResponseNotification notification) {
+        AttendeeResponseNotification notification,
+        ZoneId zoneId) {
+        LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(notification.getOccurredAt(), zoneId);
+        LocalDateTime zonedStartTime = TimeZoneConvertUtils.convertToZone(message.getStartTime(), zoneId);
+        LocalDateTime zonedEndTime = TimeZoneConvertUtils.convertToZone(message.getEndTime(), zoneId);
         return AttendeeResponseEvent.builder()
             .id(notification.getId())
             .receiverId(notification.getReceiverId())
             .type(NotificationType.ATTENDEE_RESPONSE)
-            .occurredAt(notification.getOccurredAt())
+            .occurredAt(zonedOccurredAt)
             .scheduleId(notification.getScheduleId())
             .scheduleName(message.getScheduleName())
-            .startTime(message.getStartTime())
-            .endTime(message.getEndTime())
+            .startTime(zonedStartTime)
+            .endTime(zonedEndTime)
             .attendeeId(notification.getAttendeeId())
             .attendeeName(message.getAttendeeName())
             .response(notification.getResponse())

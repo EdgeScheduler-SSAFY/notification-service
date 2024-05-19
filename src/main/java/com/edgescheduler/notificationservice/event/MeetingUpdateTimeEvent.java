@@ -4,7 +4,9 @@ import com.edgescheduler.notificationservice.client.ScheduleServiceClient.Schedu
 import com.edgescheduler.notificationservice.domain.MeetingUpdateTimeNotification;
 import com.edgescheduler.notificationservice.message.MeetingUpdateMessage;
 import com.edgescheduler.notificationservice.util.TimeStringUtils;
+import com.edgescheduler.notificationservice.util.TimeZoneConvertUtils;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -27,21 +29,27 @@ public class MeetingUpdateTimeEvent extends NotificationEvent {
 
     public static MeetingUpdateTimeEvent from(
         MeetingUpdateMessage message,
-        MeetingUpdateTimeNotification notification) {
+        MeetingUpdateTimeNotification notification,
+        ZoneId zoneId) {
+        LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(notification.getOccurredAt(), zoneId);
+        LocalDateTime zonedPreviousStartTime = TimeZoneConvertUtils.convertToZone(notification.getPreviousStartTime(), zoneId);
+        LocalDateTime zonedPreviousEndTime = TimeZoneConvertUtils.convertToZone(notification.getPreviousEndTime(), zoneId);
+        LocalDateTime zonedUpdatedStartTime = TimeZoneConvertUtils.convertToZone(notification.getUpdatedStartTime(), zoneId);
+        LocalDateTime zonedUpdatedEndTime = TimeZoneConvertUtils.convertToZone(notification.getUpdatedEndTime(), zoneId);
         return MeetingUpdateTimeEvent.builder()
             .id(notification.getId())
             .receiverId(notification.getReceiverId())
             .type(NotificationType.MEETING_UPDATED_TIME)
-            .occurredAt(notification.getOccurredAt())
+            .occurredAt(zonedOccurredAt)
             .isRead(notification.getIsRead())
             .scheduleId(notification.getScheduleId())
             .scheduleName(message.getScheduleName())
             .organizerId(message.getOrganizerId())
             .organizerName(message.getOrganizerName())
-            .previousStartTime(notification.getPreviousStartTime())
-            .previousEndTime(notification.getPreviousEndTime())
-            .updatedStartTime(notification.getUpdatedStartTime())
-            .updatedEndTime(notification.getUpdatedEndTime())
+            .previousStartTime(zonedPreviousStartTime)
+            .previousEndTime(zonedPreviousEndTime)
+            .updatedStartTime(zonedUpdatedStartTime)
+            .updatedEndTime(zonedUpdatedEndTime)
             .runningTime(notification.getRunningTime())
             .receiverStatus(AttendeeStatus.PENDING)
             .build();

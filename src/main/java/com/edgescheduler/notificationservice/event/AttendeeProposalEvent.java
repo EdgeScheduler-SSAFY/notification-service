@@ -5,7 +5,9 @@ import com.edgescheduler.notificationservice.client.UserServiceClient.UserInfo;
 import com.edgescheduler.notificationservice.domain.AttendeeProposalNotification;
 import com.edgescheduler.notificationservice.message.AttendeeProposalMessage;
 import com.edgescheduler.notificationservice.util.TimeStringUtils;
+import com.edgescheduler.notificationservice.util.TimeZoneConvertUtils;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -29,22 +31,28 @@ public class AttendeeProposalEvent extends NotificationEvent {
 
     public static AttendeeProposalEvent from(
         AttendeeProposalMessage message,
-        AttendeeProposalNotification notification) {
+        AttendeeProposalNotification notification,
+        ZoneId zoneId) {
+        LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(notification.getOccurredAt(), zoneId);
+        LocalDateTime zonedStartTime = TimeZoneConvertUtils.convertToZone(message.getStartTime(), zoneId);
+        LocalDateTime zonedEndTime = TimeZoneConvertUtils.convertToZone(message.getEndTime(), zoneId);
+        LocalDateTime zonedProposedStartTime = TimeZoneConvertUtils.convertToZone(message.getProposedStartTime(), zoneId);
+        LocalDateTime zonedProposedEndTime = TimeZoneConvertUtils.convertToZone(message.getProposedEndTime(), zoneId);
         return AttendeeProposalEvent.builder()
             .id(notification.getId())
             .type(NotificationType.ATTENDEE_PROPOSAL)
             .receiverId(notification.getReceiverId())
-            .occurredAt(notification.getOccurredAt())
+            .occurredAt(zonedOccurredAt)
             .isRead(notification.getIsRead())
             .scheduleId(notification.getScheduleId())
             .scheduleName(message.getScheduleName())
-            .startTime(message.getStartTime())
-            .endTime(message.getEndTime())
+            .startTime(zonedStartTime)
+            .endTime(zonedEndTime)
             .attendeeId(notification.getAttendeeId())
             .attendeeName(message.getAttendeeName())
             .proposalId(notification.getProposalId())
-            .proposedStartTime(notification.getProposedStartTime())
-            .proposedEndTime(notification.getProposedEndTime())
+            .proposedStartTime(zonedProposedStartTime)
+            .proposedEndTime(zonedProposedEndTime)
             .runningTime(notification.getRunningTime())
             .reason(notification.getReason())
             .build();

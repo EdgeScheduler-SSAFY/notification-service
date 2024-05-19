@@ -5,7 +5,9 @@ import com.edgescheduler.notificationservice.domain.MeetingDeleteNotification;
 import com.edgescheduler.notificationservice.message.MeetingDeleteMessage;
 import com.edgescheduler.notificationservice.message.MeetingUpdateMessage;
 import com.edgescheduler.notificationservice.util.TimeStringUtils;
+import com.edgescheduler.notificationservice.util.TimeZoneConvertUtils;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -25,18 +27,22 @@ public class MeetingDeleteEvent extends NotificationEvent {
 
     public static MeetingDeleteEvent from(
         MeetingDeleteMessage message,
-        MeetingDeleteNotification notification) {
+        MeetingDeleteNotification notification,
+        ZoneId zoneId) {
+        LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(notification.getOccurredAt(), zoneId);
+        LocalDateTime zonedStartTime = TimeZoneConvertUtils.convertToZone(message.getStartTime(), zoneId);
+        LocalDateTime zonedEndTime = TimeZoneConvertUtils.convertToZone(message.getEndTime(), zoneId);
         return MeetingDeleteEvent.builder()
             .id(notification.getId())
             .receiverId(notification.getReceiverId())
             .type(NotificationType.MEETING_DELETED)
-            .occurredAt(notification.getOccurredAt())
+            .occurredAt(zonedOccurredAt)
             .scheduleId(message.getScheduleId())
             .scheduleName(notification.getScheduleName())
             .organizerId(notification.getOrganizerId())
             .organizerName(message.getOrganizerName())
-            .startTime(notification.getStartTime())
-            .endTime(notification.getEndTime())
+            .startTime(zonedStartTime)
+            .endTime(zonedEndTime)
             .runningTime(notification.getRunningTime())
             .isRead(notification.getIsRead())
             .build();
@@ -44,18 +50,22 @@ public class MeetingDeleteEvent extends NotificationEvent {
 
     public static MeetingDeleteEvent from(
         MeetingUpdateMessage message,
-        MeetingDeleteNotification notification) {
+        MeetingDeleteNotification notification,
+        ZoneId zoneId) {
+        LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(notification.getOccurredAt(), zoneId);
+        LocalDateTime zonedStartTime = TimeZoneConvertUtils.convertToZone(notification.getStartTime(), zoneId);
+        LocalDateTime zonedEndTime = TimeZoneConvertUtils.convertToZone(notification.getEndTime(), zoneId);
         return MeetingDeleteEvent.builder()
             .id(notification.getId())
             .receiverId(notification.getReceiverId())
             .type(NotificationType.MEETING_DELETED)
-            .occurredAt(notification.getOccurredAt())
+            .occurredAt(zonedOccurredAt)
             .scheduleId(notification.getScheduleId())
             .scheduleName(notification.getScheduleName())
             .organizerId(notification.getOrganizerId())
             .organizerName(message.getOrganizerName())
-            .startTime(notification.getStartTime())
-            .endTime(notification.getEndTime())
+            .startTime(zonedStartTime)
+            .endTime(zonedEndTime)
             .runningTime(notification.getRunningTime())
             .isRead(notification.getIsRead())
             .build();

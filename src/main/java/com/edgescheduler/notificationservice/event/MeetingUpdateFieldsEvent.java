@@ -4,7 +4,9 @@ import com.edgescheduler.notificationservice.client.ScheduleServiceClient.Schedu
 import com.edgescheduler.notificationservice.domain.MeetingUpdateNotTimeNotification;
 import com.edgescheduler.notificationservice.message.MeetingUpdateMessage;
 import com.edgescheduler.notificationservice.util.TimeStringUtils;
+import com.edgescheduler.notificationservice.util.TimeZoneConvertUtils;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.Getter;
@@ -27,19 +29,23 @@ public class MeetingUpdateFieldsEvent extends NotificationEvent {
 
     public static MeetingUpdateFieldsEvent from(
         MeetingUpdateMessage message,
-        MeetingUpdateNotTimeNotification notification) {
+        MeetingUpdateNotTimeNotification notification,
+        ZoneId zoneId) {
+        LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(notification.getOccurredAt(), zoneId);
+        LocalDateTime zonedStartTime = TimeZoneConvertUtils.convertToZone(message.getUpdatedStartTime(), zoneId);
+        LocalDateTime zonedEndTime = TimeZoneConvertUtils.convertToZone(message.getUpdatedEndTime(), zoneId);
         return MeetingUpdateFieldsEvent.builder()
             .id(notification.getId())
             .receiverId(notification.getReceiverId())
             .type(NotificationType.MEETING_UPDATED_FIELDS)
-            .occurredAt(notification.getOccurredAt())
+            .occurredAt(zonedOccurredAt)
             .isRead(notification.getIsRead())
             .scheduleId(notification.getScheduleId())
             .scheduleName(message.getScheduleName())
             .organizerId(message.getOrganizerId())
             .organizerName(message.getOrganizerName())
-            .startTime(message.getUpdatedStartTime())
-            .endTime(message.getUpdatedEndTime())
+            .startTime(zonedStartTime)
+            .endTime(zonedEndTime)
             .runningTime(message.getRunningTime())
             .updatedFields(notification.getUpdatedFields())
             .build();

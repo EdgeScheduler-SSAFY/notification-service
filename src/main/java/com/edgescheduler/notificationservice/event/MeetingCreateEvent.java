@@ -6,9 +6,11 @@ import com.edgescheduler.notificationservice.exception.ErrorCode;
 import com.edgescheduler.notificationservice.message.MeetingCreateMessage;
 import com.edgescheduler.notificationservice.message.MeetingUpdateMessage;
 import com.edgescheduler.notificationservice.util.TimeStringUtils;
+import com.edgescheduler.notificationservice.util.TimeZoneConvertUtils;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -31,18 +33,22 @@ public class MeetingCreateEvent extends NotificationEvent {
 
     public static MeetingCreateEvent from(
         MeetingCreateMessage message,
-        MeetingCreateNotification notification) {
+        MeetingCreateNotification notification,
+        ZoneId zoneId) {
+        LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(notification.getOccurredAt(), zoneId);
+        LocalDateTime zonedStartTime = TimeZoneConvertUtils.convertToZone(message.getStartTime(), zoneId);
+        LocalDateTime zonedEndTime = TimeZoneConvertUtils.convertToZone(message.getEndTime(), zoneId);
         return MeetingCreateEvent.builder()
             .id(notification.getId())
             .receiverId(notification.getReceiverId())
             .type(NotificationType.MEETING_CREATED)
-            .occurredAt(notification.getOccurredAt())
+            .occurredAt(zonedOccurredAt)
             .scheduleId(notification.getScheduleId())
             .scheduleName(message.getScheduleName())
             .organizerId(message.getOrganizerId())
             .organizerName(message.getOrganizerName())
-            .startTime(message.getStartTime())
-            .endTime(message.getEndTime())
+            .startTime(zonedStartTime)
+            .endTime(zonedEndTime)
             .runningTime(message.getRunningTime())
             .receiverStatus(AttendeeStatus.PENDING)
             .isRead(notification.getIsRead())
@@ -51,18 +57,22 @@ public class MeetingCreateEvent extends NotificationEvent {
 
     public static MeetingCreateEvent from(
         MeetingUpdateMessage message,
-        MeetingCreateNotification notification) {
+        MeetingCreateNotification notification,
+        ZoneId zoneId) {
+        LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(notification.getOccurredAt(), zoneId);
+        LocalDateTime zonedStartTime = TimeZoneConvertUtils.convertToZone(message.getUpdatedStartTime(), zoneId);
+        LocalDateTime zonedEndTime = TimeZoneConvertUtils.convertToZone(message.getUpdatedEndTime(), zoneId);
         return MeetingCreateEvent.builder()
             .id(notification.getId())
             .receiverId(notification.getReceiverId())
             .type(NotificationType.MEETING_CREATED)
-            .occurredAt(notification.getOccurredAt())
+            .occurredAt(zonedOccurredAt)
             .scheduleId(notification.getScheduleId())
             .scheduleName(message.getScheduleName())
             .organizerId(message.getOrganizerId())
             .organizerName(message.getOrganizerName())
-            .startTime(message.getUpdatedStartTime())
-            .endTime(message.getUpdatedEndTime())
+            .startTime(zonedStartTime)
+            .endTime(zonedEndTime)
             .runningTime(message.getRunningTime())
             .receiverStatus(AttendeeStatus.PENDING)
             .isRead(notification.getIsRead())
