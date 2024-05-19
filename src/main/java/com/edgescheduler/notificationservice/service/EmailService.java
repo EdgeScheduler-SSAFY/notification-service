@@ -1,5 +1,11 @@
 package com.edgescheduler.notificationservice.service;
 
+import com.edgescheduler.notificationservice.event.AttendeeProposalEvent;
+import com.edgescheduler.notificationservice.event.AttendeeResponseEvent;
+import com.edgescheduler.notificationservice.event.MeetingCreateEvent;
+import com.edgescheduler.notificationservice.event.MeetingDeleteEvent;
+import com.edgescheduler.notificationservice.event.MeetingUpdateFieldsEvent;
+import com.edgescheduler.notificationservice.event.MeetingUpdateTimeEvent;
 import com.edgescheduler.notificationservice.event.NotificationEvent;
 import com.edgescheduler.notificationservice.exception.ErrorCode;
 import com.edgescheduler.notificationservice.repository.MemberInfoRepository;
@@ -22,11 +28,11 @@ public class EmailService {
     private final EmailTemplateCreator emailTemplateCreator;
 
     public Mono<Void> sendEmail(NotificationEvent event) {
-//        return memberInfoRepository.findById(event.getReceiverId())
-//            .flatMap(memberInfo -> send(
-//                memberInfo.getEmail(), event.getReceiverId() + "번 유저에게.", event));
+        return memberInfoRepository.findById(event.getReceiverId())
+            .flatMap(memberInfo -> send(
+                memberInfo.getEmail(), "[EdgeScheduler] " + getMailSubject(event), event));
         return send(
-            "oh052679@naver.com", event.getReceiverId() + "번 유저에게.", event);
+//            "oh052679@naver.com", "[EdgeScheduler] " + getMailSubject(event), event);
     }
 
     public Mono<Void> send(String to, String subject, NotificationEvent event) {
@@ -46,5 +52,22 @@ public class EmailService {
                 log.info("Email sent");
             }).onErrorMap(MessagingException.class, ErrorCode.MAIL_SEND_ERROR::exception))
             .then();
+    }
+
+    private String getMailSubject(NotificationEvent event) {
+        if (event instanceof MeetingCreateEvent) {
+            return "Meeting Created";
+        } else if (event instanceof MeetingDeleteEvent) {
+            return "Meeting Deleted";
+        } else if (event instanceof MeetingUpdateTimeEvent) {
+            return "Meeting Time Updated";
+        } else if (event instanceof MeetingUpdateFieldsEvent) {
+            return "Meeting Fields Updated";
+        } else if (event instanceof AttendeeResponseEvent) {
+            return "Attendee Response";
+        } else if (event instanceof AttendeeProposalEvent) {
+            return "Attendee Proposal";
+        }
+        return "Notification";
     }
 }
