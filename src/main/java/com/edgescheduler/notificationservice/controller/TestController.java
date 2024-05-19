@@ -79,7 +79,7 @@ public class TestController {
             .runningTime(60)
             .receiverStatus(AttendeeStatus.PENDING)
             .build();
-        return emailService.sendEmail(createEvent)
+        return emailService.sendSampleEmail(createEvent)
             .thenReturn("success");
     }
 
@@ -99,7 +99,7 @@ public class TestController {
             .endTime(LocalDateTime.now().plusHours(1))
             .runningTime(60)
             .build();
-        return emailService.sendEmail(deleteEvent)
+        return emailService.sendSampleEmail(deleteEvent)
             .thenReturn("success");
     }
 
@@ -120,7 +120,7 @@ public class TestController {
             .runningTime(60)
             .updatedFields(List.of(UpdatedField.TIME, UpdatedField.TITLE, UpdatedField.DESCRIPTION))
             .build();
-        return emailService.sendEmail(updateFieldsEvent)
+        return emailService.sendSampleEmail(updateFieldsEvent)
             .thenReturn("success");
     }
 
@@ -142,7 +142,7 @@ public class TestController {
             .updatedStartTime(LocalDateTime.now().plusHours(1))
             .updatedEndTime(LocalDateTime.now().plusHours(2))
             .build();
-        return emailService.sendEmail(updateTimeEvent)
+        return emailService.sendSampleEmail(updateTimeEvent)
             .thenReturn("success");
     }
 
@@ -162,7 +162,7 @@ public class TestController {
             .endTime(LocalDateTime.now().plusHours(1))
             .response(Response.ACCEPTED)
             .build();
-        return emailService.sendEmail(attendeeResponseEvent)
+        return emailService.sendSampleEmail(attendeeResponseEvent)
             .thenReturn("success");
     }
 
@@ -182,7 +182,7 @@ public class TestController {
             .endTime(LocalDateTime.now().plusHours(1))
             .response(Response.DECLINED)
             .build();
-        return emailService.sendEmail(attendeeResponseEvent)
+        return emailService.sendSampleEmail(attendeeResponseEvent)
             .thenReturn("success");
     }
 
@@ -205,7 +205,7 @@ public class TestController {
             .proposedEndTime(LocalDateTime.now().plusHours(2))
             .reason("참석자 제안 이유")
             .build();
-        return emailService.sendEmail(attendeeProposalEvent)
+        return emailService.sendSampleEmail(attendeeProposalEvent)
             .thenReturn("success");
     }
 

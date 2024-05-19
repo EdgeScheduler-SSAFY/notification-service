@@ -31,13 +31,17 @@ public class EmailService {
         return memberInfoRepository.findById(event.getReceiverId())
             .flatMap(memberInfo -> send(
                 memberInfo.getEmail(), "[EdgeScheduler] " + getMailSubject(event), event));
-//        return send(
-//            "oh052679@naver.com", "[EdgeScheduler] " + getMailSubject(event), event);
+    }
+
+    public Mono<Void> sendSampleEmail(NotificationEvent event) {
+        return send(
+            "seahee0130@gmail.com", "[EdgeScheduler] " + getMailSubject(event), event);
     }
 
     public Mono<Void> send(String to, String subject, NotificationEvent event) {
         return event.emailContext()
-            .flatMap(context -> emailTemplateCreator.createTemplate(event.getTemplateName(), context))
+            .flatMap(
+                context -> emailTemplateCreator.createTemplate(event.getTemplateName(), context))
             .flatMap(template -> Mono.fromCallable(() -> {
                 MimeMessage mimeMessage = javaMailSender.createMimeMessage();
                 MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
