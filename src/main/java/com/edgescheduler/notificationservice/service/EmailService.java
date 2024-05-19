@@ -31,7 +31,7 @@ public class EmailService {
         return memberInfoRepository.findById(event.getReceiverId())
             .flatMap(memberInfo -> send(
                 memberInfo.getEmail(), "[EdgeScheduler] " + getMailSubject(event), event));
-        return send(
+//        return send(
 //            "oh052679@naver.com", "[EdgeScheduler] " + getMailSubject(event), event);
     }
 
