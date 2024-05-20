@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class CustomNotificationRepositoryImpl implements CustomNotificationRepository {
 
-    ReactiveMongoTemplate mongoTemplate;
+    private final ReactiveMongoTemplate mongoTemplate;
 
     @Override
     public Mono<Void> markAsRead(String notificationId) {

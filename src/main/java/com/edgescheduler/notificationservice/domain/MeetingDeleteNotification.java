@@ -13,6 +13,7 @@ import org.springframework.data.annotation.TypeAlias;
 @NoArgsConstructor
 @TypeAlias("meetingDelete")
 public class MeetingDeleteNotification extends Notification {
+
     private String scheduleName;
     private Integer organizerId;
     private LocalDateTime startTime;
@@ -24,6 +25,7 @@ public class MeetingDeleteNotification extends Notification {
             .receiverId(attendeeId)
             .occurredAt(message.getOccurredAt())
             .isRead(false)
+            .scheduleId(message.getScheduleId())
             .scheduleName(message.getScheduleName())
             .organizerId(message.getOrganizerId())
             .startTime(message.getStartTime())
@@ -37,6 +39,7 @@ public class MeetingDeleteNotification extends Notification {
             .receiverId(attendeeId)
             .occurredAt(message.getOccurredAt())
             .isRead(false)
+            .scheduleId(message.getScheduleId())
             .scheduleName(message.getScheduleName())
             .organizerId(message.getOrganizerId())
             .startTime(message.getUpdatedStartTime())

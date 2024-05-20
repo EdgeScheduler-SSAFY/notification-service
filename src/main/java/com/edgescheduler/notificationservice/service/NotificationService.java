@@ -8,22 +8,20 @@ import com.edgescheduler.notificationservice.domain.MeetingUpdateNotTimeNotifica
 import com.edgescheduler.notificationservice.domain.MeetingUpdateTimeNotification;
 import com.edgescheduler.notificationservice.domain.Notification;
 import com.edgescheduler.notificationservice.dto.NotificationPage;
-import com.edgescheduler.notificationservice.event.AttendeeProposalSseEvent;
-import com.edgescheduler.notificationservice.event.AttendeeResponseSseEvent;
-import com.edgescheduler.notificationservice.event.AttendeeStatus;
-import com.edgescheduler.notificationservice.event.MeetingCreateSseEvent;
-import com.edgescheduler.notificationservice.event.MeetingDeleteSseEvent;
-import com.edgescheduler.notificationservice.event.MeetingUpdateNotTimeSseEvent;
-import com.edgescheduler.notificationservice.event.MeetingUpdateTimeSseEvent;
-import com.edgescheduler.notificationservice.event.NotificationSseEvent;
-import com.edgescheduler.notificationservice.event.NotificationType;
+import com.edgescheduler.notificationservice.event.AttendeeProposalEvent;
+import com.edgescheduler.notificationservice.event.AttendeeResponseEvent;
+import com.edgescheduler.notificationservice.event.MeetingCreateEvent;
+import com.edgescheduler.notificationservice.event.MeetingDeleteEvent;
+import com.edgescheduler.notificationservice.event.MeetingUpdateFieldsEvent;
+import com.edgescheduler.notificationservice.event.MeetingUpdateTimeEvent;
+import com.edgescheduler.notificationservice.event.NotificationEvent;
 import com.edgescheduler.notificationservice.event.UpdatedField;
 import com.edgescheduler.notificationservice.message.AttendeeProposalMessage;
 import com.edgescheduler.notificationservice.message.AttendeeResponseMessage;
-import com.edgescheduler.notificationservice.message.NotificationMessage;
 import com.edgescheduler.notificationservice.message.MeetingCreateMessage;
 import com.edgescheduler.notificationservice.message.MeetingDeleteMessage;
 import com.edgescheduler.notificationservice.message.MeetingUpdateMessage;
+import com.edgescheduler.notificationservice.message.NotificationMessage;
 import com.edgescheduler.notificationservice.repository.NotificationRepository;
 import com.edgescheduler.notificationservice.util.NotificationEventConverter;
 import java.time.Instant;
@@ -45,8 +43,9 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final NotificationEventConverter notificationEventConverter;
+    private final MemberInfoService memberInfoService;
 
-    public Publisher<NotificationSseEvent> saveNotificationFromEventMessage(
+    public Publisher<NotificationEvent> saveNotificationFromEventMessage(
         NotificationMessage eventMessage) {
 
         log.info("Received event message: {}", eventMessage.getOccurredAt());
@@ -69,7 +68,7 @@ public class NotificationService {
         return Flux.empty();
     }
 
-    private Flux<NotificationSseEvent> saveAndGetMeetingCreateEvent(
+    private Flux<NotificationEvent> saveAndGetMeetingCreateEvent(
         MeetingCreateMessage meetingCreateMessage) {
         return Mono.just(meetingCreateMessage)
             .flatMapMany(message -> {
@@ -77,14 +76,21 @@ public class NotificationService {
                 attendeeIds.remove(message.getOrganizerId());
                 List<MeetingCreateNotification> notifications = attendeeIds.stream()
                     .map(
-                        attendeeId -> MeetingCreateNotification.from(attendeeId, meetingCreateMessage)
+                        attendeeId -> MeetingCreateNotification.from(attendeeId,
+                            meetingCreateMessage)
                     ).toList();
                 return notificationRepository.saveAll(notifications);
-            })
-            .map(notification -> MeetingCreateSseEvent.from(meetingCreateMessage, notification));
+            }).flatMap(notification -> Mono.zip(
+                Mono.just(notification),
+                memberInfoService.getZoneIdOfMember(notification.getReceiverId())
+            )).map(tuple2 -> {
+                var notification = tuple2.getT1();
+                var zoneId = tuple2.getT2();
+                return MeetingCreateEvent.from(meetingCreateMessage, notification, zoneId);
+            });
     }
 
-    private Flux<NotificationSseEvent> saveAndGetMeetingUpdateEvent(
+    private Flux<NotificationEvent> saveAndGetMeetingUpdateEvent(
         MeetingUpdateMessage meetingUpdateMessage) {
         return Mono.just(meetingUpdateMessage)
             .flatMapMany(message -> {
@@ -95,36 +101,79 @@ public class NotificationService {
                 List<Integer> removedAttendeeIds = message.getRemovedAttendeeIds();
                 removedAttendeeIds.remove(message.getOrganizerId());
 
-                Flux<NotificationSseEvent> addedEvents = Mono.just(
+                Flux<NotificationEvent> addedEvents = Mono.just(
                         addedAttendeeIds.stream().map(
                             attendeeId -> MeetingCreateNotification.from(attendeeId, message)
                         ).toList()
                     ).flatMapMany(notificationRepository::saveAll)
-                    .map(notification -> MeetingCreateSseEvent.from(meetingUpdateMessage, notification));
+                    .flatMap(notification -> Mono.zip(
+                        Mono.just(notification),
+                        memberInfoService.getZoneIdOfMember(notification.getReceiverId())
+                    ))
+                    .map(tuple2 -> {
+                        var notification = tuple2.getT1();
+                        var zoneId = tuple2.getT2();
+                        return MeetingCreateEvent.from(meetingUpdateMessage, notification, zoneId);
+                    });
 
-                Flux<NotificationSseEvent> removedEvents = Mono.just(
-                        removedAttendeeIds.stream().map(
-                            attendeeId -> MeetingDeleteNotification.from(attendeeId, meetingUpdateMessage)
-                        ).toList()
-                    ).flatMapMany(notificationRepository::saveAll)
-                    .map(notification -> MeetingDeleteSseEvent.from(meetingUpdateMessage, notification));
+                Flux<NotificationEvent> removedEvents =
+                    Flux.fromIterable(removedAttendeeIds)
+                        .flatMap(
+                            attendeeId -> notificationRepository.deleteByReceiverIdAndScheduleId(
+                                attendeeId, meetingUpdateMessage.getScheduleId())
+                        ).then(Mono.just(
+                            removedAttendeeIds.stream().map(
+                                attendeeId -> MeetingDeleteNotification.from(attendeeId,
+                                    meetingUpdateMessage)
+                            ).toList()
+                        ))
+                        .flatMapMany(notificationRepository::saveAll)
+                        .flatMap(notification -> Mono.zip(
+                                Mono.just(notification),
+                                memberInfoService.getZoneIdOfMember(notification.getReceiverId())
+                        ))
+                        .map(tuple2 -> {
+                            var notification = tuple2.getT1();
+                            var zoneId = tuple2.getT2();
+                            return MeetingDeleteEvent.from(meetingUpdateMessage, notification, zoneId);
+                        });
 
-                Flux<NotificationSseEvent> updatedEvents = Mono.just(
+                Flux<NotificationEvent> updatedEvents = Mono.just(
                         maintainedAttendeeIds.stream().map(
-                            attendeeId -> MeetingUpdateNotTimeNotification.from(attendeeId, meetingUpdateMessage)
+                            attendeeId -> MeetingUpdateNotTimeNotification.from(attendeeId,
+                                meetingUpdateMessage)
                         ).toList()
                     ).flatMapMany(notificationRepository::saveAll)
-                    .map(notification -> MeetingUpdateNotTimeSseEvent.from(meetingUpdateMessage, notification));
+                    .flatMap(notification -> Mono.zip(
+                        Mono.just(notification),
+                        memberInfoService.getZoneIdOfMember(notification.getReceiverId())
+                    ))
+                    .map(tuple2 -> {
+                        var notification = tuple2.getT1();
+                        var zoneId = tuple2.getT2();
+                        return MeetingUpdateFieldsEvent.from(meetingUpdateMessage,
+                            notification, zoneId);
+                    });
 
                 if (meetingUpdateMessage.getUpdatedFields().contains(UpdatedField.TIME)) {
                     updatedEvents = Flux.mergeSequential(
                         updatedEvents,
                         Mono.just(
                                 maintainedAttendeeIds.stream().map(
-                                    attendeeId -> MeetingUpdateTimeNotification.from(attendeeId, meetingUpdateMessage)
+                                    attendeeId -> MeetingUpdateTimeNotification.from(attendeeId,
+                                        meetingUpdateMessage)
                                 ).toList()
                             ).flatMapMany(notificationRepository::saveAll)
-                            .map(notification -> MeetingUpdateTimeSseEvent.from(meetingUpdateMessage, notification))
+                            .flatMap(notification -> Mono.zip(
+                                Mono.just(notification),
+                                memberInfoService.getZoneIdOfMember(notification.getReceiverId())
+                            ))
+                            .map(tuple2 -> {
+                                var notification = tuple2.getT1();
+                                var zoneId = tuple2.getT2();
+                                return MeetingUpdateTimeEvent.from(meetingUpdateMessage,
+                                    notification, zoneId);
+                            })
                     );
                 }
 
@@ -132,41 +181,61 @@ public class NotificationService {
             });
     }
 
-    private Flux<NotificationSseEvent> saveAndGetMeetingDeleteEvent(MeetingDeleteMessage
+    private Flux<NotificationEvent> saveAndGetMeetingDeleteEvent(MeetingDeleteMessage
         meetingDeleteMessage) {
         return Mono.just(meetingDeleteMessage)
+            .flatMap(message -> notificationRepository.deleteByScheduleId(message.getScheduleId())
+                .thenReturn(message))
             .flatMapMany(message -> {
                 List<Integer> attendeeIds = message.getAttendeeIds();
                 attendeeIds.remove(message.getOrganizerId());
                 List<MeetingDeleteNotification> notifications = attendeeIds.stream()
                     .map(
-                        attendeeId -> MeetingDeleteNotification.from(attendeeId, meetingDeleteMessage)
+                        attendeeId -> MeetingDeleteNotification.from(attendeeId,
+                            meetingDeleteMessage)
                     ).toList();
                 return notificationRepository.saveAll(notifications);
-            }).map(notification -> MeetingDeleteSseEvent.from(meetingDeleteMessage, notification));
+            }).flatMap(notification -> Mono.zip(
+                Mono.just(notification),
+                memberInfoService.getZoneIdOfMember(notification.getReceiverId())
+            )).map(tuple2 -> {
+                var notification = tuple2.getT1();
+                var zoneId = tuple2.getT2();
+                return MeetingDeleteEvent.from(meetingDeleteMessage, notification, zoneId);
+            });
     }
 
-    private Mono<NotificationSseEvent> saveAndGetAttendeeResponseEvent(AttendeeResponseMessage
+    private Mono<NotificationEvent> saveAndGetAttendeeResponseEvent(AttendeeResponseMessage
         attendeeResponseMessage) {
         return Mono.just(attendeeResponseMessage)
             .flatMap(message -> {
                 var notification = AttendeeResponseNotification.from(message);
                 return notificationRepository.save(notification);
-            }).map(notification -> AttendeeResponseSseEvent.from(attendeeResponseMessage,
-                notification));
+            }).zipWith(memberInfoService.getZoneIdOfMember(attendeeResponseMessage.getOrganizerId()))
+            .map(tuple -> {
+                var notification = tuple.getT1();
+                var zoneId = tuple.getT2();
+                return AttendeeResponseEvent.from(attendeeResponseMessage,
+                    notification, zoneId);
+            });
     }
 
-    private Mono<NotificationSseEvent> saveAndGetAttendeeProposalEvent(AttendeeProposalMessage
+    private Mono<NotificationEvent> saveAndGetAttendeeProposalEvent(AttendeeProposalMessage
         attendeeProposalMessage) {
         return Mono.just(attendeeProposalMessage)
             .flatMap(message -> {
                 var notification = AttendeeProposalNotification.from(message);
                 return notificationRepository.save(notification);
-            }).map(notification -> AttendeeProposalSseEvent.from(attendeeProposalMessage,
-                notification));
+            }).zipWith(memberInfoService.getZoneIdOfMember(attendeeProposalMessage.getOrganizerId()))
+            .map(tuple -> {
+                var notification = tuple.getT1();
+                var zoneId = tuple.getT2();
+                return AttendeeProposalEvent.from(attendeeProposalMessage,
+                    notification, zoneId);
+            });
     }
 
-    public Flux<NotificationSseEvent> getNotificationsByReceiverIdWithin2Weeks(Integer receiverId) {
+    public Flux<NotificationEvent> getNotificationsByReceiverIdWithin2Weeks(Integer receiverId) {
         LocalDateTime now = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
         Flux<Notification> notifications = notificationRepository.findNotificationsAfter(
             receiverId, now.minusDays(14));
@@ -182,11 +251,11 @@ public class NotificationService {
             .zipWith(notificationRepository.countByReceiverIdAndOccurredAtGreaterThanEqual(
                 receiverId, LocalDateTime.now().minusDays(14)))
             .map(tuple -> {
-                List<NotificationSseEvent> data = tuple.getT1();
+                List<NotificationEvent> data = tuple.getT1();
                 Integer total = Math.toIntExact(tuple.getT2());
                 return NotificationPage.builder()
                     .page(page)
-                    .size(size)
+                    .size(data.size())
                     .totalPages((total + size - 1) / size)
                     .totalElements(total)
                     .data(data)

@@ -31,14 +31,16 @@ public class MemberInfoService {
                 .build()));
     }
 
-    public Mono<MemberInfo> upsertEmailOfMember(Integer memberId, String email) {
+    public Mono<MemberInfo> upsertMemberInfo(Integer memberId, String email, String zoneId) {
         return memberInfoRepository.findById(memberId)
             .flatMap(memberInfo -> {
+                memberInfo.changeZoneId(zoneId);
                 memberInfo.changeEmail(email);
                 return memberInfoRepository.save(memberInfo);
             }).switchIfEmpty(memberInfoRepository.save(MemberInfo.builder()
                 .memberId(memberId)
                 .email(email)
+                .zoneId(zoneId)
                 .build()));
     }
 

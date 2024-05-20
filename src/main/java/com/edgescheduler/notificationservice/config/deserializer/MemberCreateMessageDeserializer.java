@@ -1,12 +1,12 @@
 package com.edgescheduler.notificationservice.config.deserializer;
 
-import com.edgescheduler.notificationservice.message.MemberEmailMessage;
+import com.edgescheduler.notificationservice.message.MemberCreateMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Map;
 import org.apache.kafka.common.serialization.Deserializer;
 
-public class MemberEmailMessageDeserializer implements Deserializer<MemberEmailMessage> {
+public class MemberCreateMessageDeserializer implements Deserializer<MemberCreateMessage> {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -16,14 +16,14 @@ public class MemberEmailMessageDeserializer implements Deserializer<MemberEmailM
     }
 
     @Override
-    public MemberEmailMessage deserialize(String topic, byte[] data) {
+    public MemberCreateMessage deserialize(String topic, byte[] data) {
 
         if (data == null) {
             return null;
         }
 
         try {
-            return objectMapper.readValue(data, MemberEmailMessage.class);
+            return objectMapper.readValue(data, MemberCreateMessage.class);
         } catch (IOException e) {
             throw new RuntimeException("Error deserializing ChangeTimeZoneMessage", e);
         }

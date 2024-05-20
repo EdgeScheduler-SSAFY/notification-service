@@ -1,10 +1,10 @@
 package com.edgescheduler.notificationservice.config;
 
 import com.edgescheduler.notificationservice.config.deserializer.ChangeTimeZoneMessageDeserializer;
-import com.edgescheduler.notificationservice.config.deserializer.MemberEmailMessageDeserializer;
+import com.edgescheduler.notificationservice.config.deserializer.MemberCreateMessageDeserializer;
 import com.edgescheduler.notificationservice.config.deserializer.NotificationMessageJsonDeserializer;
 import com.edgescheduler.notificationservice.message.ChangeTimeZoneMessage;
-import com.edgescheduler.notificationservice.message.MemberEmailMessage;
+import com.edgescheduler.notificationservice.message.MemberCreateMessage;
 import com.edgescheduler.notificationservice.message.NotificationMessage;
 import java.util.List;
 import java.util.Map;
@@ -70,8 +70,14 @@ public class KafkaConfig {
         KafkaProperties properties
     ) {
         Map<String, Object> consumerProperties = properties.buildConsumerProperties(null);
-        consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-            NotificationMessageJsonDeserializer.class);
+        consumerProperties.putAll(Map.of(
+            ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, NotificationMessageJsonDeserializer.class,
+            "topic.meeting-created", meetingCreatedTopic,
+            "topic.meeting-deleted", meetingDeletedTopic,
+            "topic.meeting-updated", meetingUpdatedTopic,
+            "topic.attendee-response", attendeeResponseTopic,
+            "topic.attendee-proposal", attendeeProposalTopic
+        ));
         ReceiverOptions<String, NotificationMessage> receiverOptions = ReceiverOptions.create(
             consumerProperties);
         receiverOptions = receiverOptions.subscription(
@@ -94,13 +100,13 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ReactiveKafkaConsumerTemplate<String, MemberEmailMessage> emailConsumerTemplate(
+    public ReactiveKafkaConsumerTemplate<String, MemberCreateMessage> emailConsumerTemplate(
         KafkaProperties properties
     ) {
         Map<String, Object> consumerProperties = properties.buildConsumerProperties(null);
         consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-            MemberEmailMessageDeserializer.class);
-        ReceiverOptions<String, MemberEmailMessage> receiverOptions = ReceiverOptions.create(
+            MemberCreateMessageDeserializer.class);
+        ReceiverOptions<String, MemberCreateMessage> receiverOptions = ReceiverOptions.create(
             consumerProperties);
         receiverOptions = receiverOptions.subscription(List.of(memberCreatedTopic));
         return new ReactiveKafkaConsumerTemplate<>(receiverOptions);

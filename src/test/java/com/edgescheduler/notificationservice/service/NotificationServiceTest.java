@@ -5,7 +5,7 @@ import static org.mockito.ArgumentMatchers.anyIterable;
 import static org.mockito.Mockito.when;
 
 import com.edgescheduler.notificationservice.domain.MeetingCreateNotification;
-import com.edgescheduler.notificationservice.event.NotificationSseEvent;
+import com.edgescheduler.notificationservice.event.NotificationEvent;
 import com.edgescheduler.notificationservice.message.MeetingCreateMessage;
 import com.edgescheduler.notificationservice.repository.MemberInfoRepository;
 import com.edgescheduler.notificationservice.repository.NotificationRepository;
@@ -63,7 +63,7 @@ class NotificationServiceTest {
         var result = notificationService.saveNotificationFromEventMessage(eventMessage);
 
         // then
-        FirstStep<NotificationSseEvent> step = StepVerifier.create(result);
+        FirstStep<NotificationEvent> step = StepVerifier.create(result);
         for (int i = 2; i < 100; i++) {
             int finalI = i;
             step.assertNext(event -> {

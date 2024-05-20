@@ -12,8 +12,9 @@ import org.springframework.data.annotation.TypeAlias;
 @NoArgsConstructor
 @TypeAlias("attendeeProposal")
 public class AttendeeProposalNotification extends Notification {
-    private Long scheduleId;
+
     private Integer attendeeId;
+    private Long proposalId;
     private LocalDateTime proposedStartTime;
     private LocalDateTime proposedEndTime;
     private Integer runningTime;
@@ -26,6 +27,7 @@ public class AttendeeProposalNotification extends Notification {
             .isRead(false)
             .scheduleId(message.getScheduleId())
             .attendeeId(message.getAttendeeId())
+            .proposalId(message.getProposalId())
             .proposedStartTime(message.getProposedStartTime())
             .proposedEndTime(message.getProposedEndTime())
             .runningTime(message.getRunningTime())

@@ -8,15 +8,14 @@ import com.edgescheduler.notificationservice.domain.MeetingDeleteNotification;
 import com.edgescheduler.notificationservice.domain.MeetingUpdateNotTimeNotification;
 import com.edgescheduler.notificationservice.domain.MeetingUpdateTimeNotification;
 import com.edgescheduler.notificationservice.domain.Notification;
-import com.edgescheduler.notificationservice.event.AttendeeProposalSseEvent;
-import com.edgescheduler.notificationservice.event.AttendeeResponseSseEvent;
-import com.edgescheduler.notificationservice.event.MeetingCreateSseEvent;
-import com.edgescheduler.notificationservice.event.MeetingDeleteSseEvent;
-import com.edgescheduler.notificationservice.event.MeetingUpdateNotTimeSseEvent;
-import com.edgescheduler.notificationservice.event.MeetingUpdateTimeSseEvent;
-import com.edgescheduler.notificationservice.event.NotificationSseEvent;
+import com.edgescheduler.notificationservice.event.AttendeeProposalEvent;
+import com.edgescheduler.notificationservice.event.AttendeeResponseEvent;
+import com.edgescheduler.notificationservice.event.MeetingCreateEvent;
+import com.edgescheduler.notificationservice.event.MeetingDeleteEvent;
+import com.edgescheduler.notificationservice.event.MeetingUpdateFieldsEvent;
+import com.edgescheduler.notificationservice.event.MeetingUpdateTimeEvent;
+import com.edgescheduler.notificationservice.event.NotificationEvent;
 import com.edgescheduler.notificationservice.client.UserServiceClient;
-import com.edgescheduler.notificationservice.event.NotificationType;
 import com.edgescheduler.notificationservice.service.MemberInfoService;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -35,7 +34,7 @@ public class NotificationEventConverter {
     private final ScheduleServiceClient scheduleServiceClient;
     private final MemberInfoService memberInfoService;
 
-    public Mono<NotificationSseEvent> convert(Notification notification) {
+    public Mono<NotificationEvent> convert(Notification notification) {
         if (notification instanceof MeetingCreateNotification meetingCreateNotification) {
             return convertToMeetingCreateSseEvent(meetingCreateNotification);
         }
@@ -59,7 +58,7 @@ public class NotificationEventConverter {
         return Mono.empty();
     }
 
-    private Mono<NotificationSseEvent> convertToAttendeeProposalSseEvent(
+    private Mono<NotificationEvent> convertToAttendeeProposalSseEvent(
         AttendeeProposalNotification attendeeProposalNotification) {
         return Mono.zip(
                 memberInfoService.getZoneIdOfMember(attendeeProposalNotification.getReceiverId())
@@ -80,7 +79,7 @@ public class NotificationEventConverter {
                     attendeeProposalNotification.getProposedStartTime(), memberTimezone);
                 LocalDateTime zonedProposedEndTime = TimeZoneConvertUtils.convertToZone(
                     attendeeProposalNotification.getProposedEndTime(), memberTimezone);
-                return AttendeeProposalSseEvent.convertFrom(
+                return AttendeeProposalEvent.convertFrom(
                     attendeeProposalNotification,
                     scheduleInfo,
                     attendeeInfo,
@@ -90,7 +89,7 @@ public class NotificationEventConverter {
             });
     }
 
-    private Mono<NotificationSseEvent> convertToAttendeeResponseSseEvent(
+    private Mono<NotificationEvent> convertToAttendeeResponseSseEvent(
         AttendeeResponseNotification attendeeResponseNotification) {
         return Mono.zip(
                 memberInfoService.getZoneIdOfMember(attendeeResponseNotification.getReceiverId())
@@ -107,15 +106,21 @@ public class NotificationEventConverter {
                 var attendeeInfo = tuple.getT3();
                 LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(
                     attendeeResponseNotification.getOccurredAt(), memberTimezone);
-                return AttendeeResponseSseEvent.convertFrom(
+                LocalDateTime zonedStartTime = TimeZoneConvertUtils.convertToZone(
+                    scheduleInfo.getStartDatetime(), memberTimezone);
+                LocalDateTime zonedEndTime = TimeZoneConvertUtils.convertToZone(
+                    scheduleInfo.getEndDatetime(), memberTimezone);
+                return AttendeeResponseEvent.convertFrom(
                     attendeeResponseNotification,
                     scheduleInfo,
                     attendeeInfo,
-                    zonedOccurredAt);
+                    zonedOccurredAt,
+                    zonedStartTime,
+                    zonedEndTime);
             });
     }
 
-    private Mono<NotificationSseEvent> convertToMeetingDeleteSseEvent(
+    private Mono<NotificationEvent> convertToMeetingDeleteSseEvent(
         MeetingDeleteNotification meetingDeleteNotification) {
         return Mono.zip(
                 memberInfoService.getZoneIdOfMember(meetingDeleteNotification.getReceiverId())
@@ -128,14 +133,20 @@ public class NotificationEventConverter {
                 var organizerInfo = tuple.getT2();
                 LocalDateTime zonedOccurredAt = TimeZoneConvertUtils.convertToZone(
                     meetingDeleteNotification.getOccurredAt(), memberTimezone);
-                return MeetingDeleteSseEvent.convertFrom(
+                LocalDateTime zonedStartTime = TimeZoneConvertUtils.convertToZone(
+                    meetingDeleteNotification.getStartTime(), memberTimezone);
+                LocalDateTime zonedEndTime = TimeZoneConvertUtils.convertToZone(
+                    meetingDeleteNotification.getEndTime(), memberTimezone);
+                return MeetingDeleteEvent.convertFrom(
                     meetingDeleteNotification,
                     organizerInfo,
-                    zonedOccurredAt);
+                    zonedOccurredAt,
+                    zonedStartTime,
+                    zonedEndTime);
             });
     }
 
-    private Mono<NotificationSseEvent> convertToMeetingUpdateNotTimeSseEvent(
+    private Mono<NotificationEvent> convertToMeetingUpdateNotTimeSseEvent(
         MeetingUpdateNotTimeNotification meetingUpdateNotTimeNotification) {
         return Mono.zip(
                 memberInfoService.getZoneIdOfMember(
@@ -154,7 +165,7 @@ public class NotificationEventConverter {
                         scheduleInfo.getStartDatetime(), memberTimezone);
                     LocalDateTime zonedEndTime = TimeZoneConvertUtils.convertToZone(
                         scheduleInfo.getEndDatetime(), memberTimezone);
-                    return MeetingUpdateNotTimeSseEvent.convertFrom(
+                    return MeetingUpdateFieldsEvent.convertFrom(
                         meetingUpdateNotTimeNotification,
                         scheduleInfo,
                         zonedStartTime,
@@ -165,7 +176,7 @@ public class NotificationEventConverter {
             );
     }
 
-    private Mono<NotificationSseEvent> convertToMeetingUpdateTimeSseEvent(
+    private Mono<NotificationEvent> convertToMeetingUpdateTimeSseEvent(
         MeetingUpdateTimeNotification meetingUpdateTimeNotification) {
         return Mono.zip(
                 memberInfoService.getZoneIdOfMember(meetingUpdateTimeNotification.getReceiverId())
@@ -187,7 +198,7 @@ public class NotificationEventConverter {
                         meetingUpdateTimeNotification.getUpdatedStartTime(), memberTimezone);
                     LocalDateTime zonedUpdatedEndTime = TimeZoneConvertUtils.convertToZone(
                         meetingUpdateTimeNotification.getUpdatedEndTime(), memberTimezone);
-                    return MeetingUpdateTimeSseEvent.convertFrom(
+                    return MeetingUpdateTimeEvent.convertFrom(
                         meetingUpdateTimeNotification,
                         scheduleInfo,
                         zonedPreviousStartTime,
@@ -200,7 +211,7 @@ public class NotificationEventConverter {
             );
     }
 
-    private Mono<NotificationSseEvent> convertToMeetingCreateSseEvent(
+    private Mono<NotificationEvent> convertToMeetingCreateSseEvent(
         MeetingCreateNotification meetingCreateNotification) {
         return Mono.zip(
                 memberInfoService.getZoneIdOfMember(meetingCreateNotification.getReceiverId())
@@ -219,7 +230,7 @@ public class NotificationEventConverter {
                     scheduleInfo.getStartDatetime(), memberTimezone);
                 LocalDateTime zonedEndTime = TimeZoneConvertUtils.convertToZone(
                     scheduleInfo.getEndDatetime(), memberTimezone);
-                return MeetingCreateSseEvent.convertFrom(
+                return MeetingCreateEvent.convertFrom(
                     meetingCreateNotification,
                     scheduleInfo,
                     zonedStartTime,

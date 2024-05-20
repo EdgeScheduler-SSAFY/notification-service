@@ -9,8 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberEmailMessage {
+public class MemberCreateMessage {
 
-    private Integer id;
+    private Integer memberId;
     private String email;
+    private String zoneId;
 }

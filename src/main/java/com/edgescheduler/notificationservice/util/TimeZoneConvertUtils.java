@@ -11,4 +11,10 @@ public class TimeZoneConvertUtils {
         ZonedDateTime zonedDateTime = time.atZone(ZoneOffset.UTC);
         return zonedDateTime.withZoneSameInstant(zoneId).toLocalDateTime();
     }
+
+    public static void main(String[] args) {
+        LocalDateTime time = LocalDateTime.now();
+        ZoneId zoneId = ZoneId.of("America/Santiago");
+        System.out.println(convertToZone(time, zoneId));
+    }
 }
